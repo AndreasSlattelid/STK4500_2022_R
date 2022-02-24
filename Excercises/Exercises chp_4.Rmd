@@ -1,0 +1,330 @@
+---
+title: "Exerciseses chapter 4"
+author: "Andreas Slåttelid"
+date: "23/2/2022"
+output: 
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 4.3
+
+In this exercise we are considering a disability insurance, hence $S = \{*,\diamond ,\dagger \}$. The contractual information given are: as follows: 
+
+```{r}
+x <- 30     #age
+T <- 35     #length of contract
+D <- 20000  #disability pension
+r <- 0.03   #intereset rate
+premium_yearly <- 2500
+```
+
+Furthermore the transition rates are given by: 
+```{r}
+lambda <- function(t){
+  #we do not have any t-dependency
+  m12 <- 0.0279 
+  m13 <- 0.0229
+  m11 <- -(m12+m13)
+  m21 <- 0
+  m23 <- 0.0229
+  m22 <- -(m21+m23)
+  m31 <- m32 <- m33 <- 0
+  L <- matrix(c(m11,m12,m13,m21,m22,m23,m31,m32,m33), nrow=3, byrow=TRUE)
+  
+  return(L)
+}
+```
+
+We also have the following policy-functions: 
+$$\begin{aligned}
+a_{*}(t) &= \begin{cases}
+0, &t<0 \\
+-\pi t, &t\in[0,T) \\ 
+-\pi T, &t\geq T
+\end{cases} \\ 
+a_{\diamond}(t) &= \begin{cases}
+0, &t<0 \\
+Dt, &t\in[0,T) \\ 
+DT, &t\geq T
+\end{cases} 
+\end{aligned}$$
+
+
+We were asked to calculate $V_{j}^{+}(t,A)$ for $j = *, \diamond$ and for $t=30$.
+We then get: 
+$$\begin{aligned}
+V_{*}^{+}(t,A) &= \frac{1}{v(t)}\left[\int_{t}^{T}v(s)p_{**}(x+t,x+s)da_{*}(s)   
++ \int_{t}^{T}v(s)p_{*\diamond}(x+t,x+s)da_{\diamond}(s) 
+\right] \\ 
+&= \frac{1}{v(t)}\left[-\pi\int_{t}^{T}v(s)p_{**}(x+t,x+s)ds   
++ D\int_{t}^{T}v(s)p_{*\diamond}(x+t,x+s)ds 
+\right]
+\end{aligned}$$
+
+\newpage 
+
+$$\begin{aligned}
+V_{\diamond}^{+}(t,A) &= \frac{1}{v(t)}\left[
+\int_{t}^{T}v(s)p_{\diamond \diamond}(x+t, x+s)da_{\diamond}(s)
+\right] \\ 
+&= \frac{1}{v(t)}\left[D
+\int_{t}^{T}v(s)p_{\diamond \diamond}(x+t, x+s)ds
+\right] 
+\end{aligned}$$
+We will now use an Euler-scheme to simulate what's going on, and then use a Riemann-sum to compute the integrals: 
+$$
+\int_{a}^{b}f(x)dx \approx \sum_{i=0}^{n-1}f(x_{i}^{*})\Delta x
+$$
+Where $\Delta x = \frac{b-a}{n}$, which in our case corresponds to: $h$ and $x_{i}^{*} \in [x_{i},x_{i+1}]$
+```{r}
+field <- function(t,M){
+  return(M%*%lambda(t))
+}
+
+#field(t0, P0)
+
+Euler <- function(t0,P0,h,tn){
+  if(t0==tn){ return(P0)}
+  N <- (tn-t0)/h
+  D <- dim(P0)[1] #gives dimension of mxn matrix dim = c(m,n)
+  #Initial condition at s
+  P <- array(diag(D*(N+1)), dim=c(D,D,N+1))
+  #First iteration
+  P[,,1] <- P0
+  
+  
+  for(n in 1:N){
+    P[,,n+1] <- P[,,n]+h*field(t0+n*h,P[,,n])
+  }
+  return(P) #returns array, array(data , dim= c(3,3,2)), this stores 2 3x3 matricies
+}
+
+t0 <- 60       #start age
+P0 <- diag(3)  #initial start with P(s,s) = I
+tn <- 110      #end age
+h <- 1/12      #step size 
+N <- (tn-t0)/h #number of steps
+
+sol <- Euler(t0,P0,h,tn) #contains ages transition probs from 60 to 65.
+
+v <- function(t){
+  return(exp(-r*t))
+}
+
+
+#v(s), but s in [30,35]
+v_ages <- sapply(seq(30, 35, by = h), v) #we apply the function v to each element
+
+
+
+
+#sum1 where we do not care about the premium until afterwards, we use Riemann-sum.
+s1 <- 0 
+for (i in 1:(length(v_ages)-1)){
+  s1 <- s1 + v_ages[i]*sol[1,1, ][i]*h #survival i.e * -> *
+}
+
+#sum2: do not care about D=20.000 until afterwards
+s2 <- 0 
+for (i in 1:(length(v_ages)-1)){
+  s2 <- s2 + v_ages[i]*sol[1,2,][i]*h #disability i.e * -> dis
+}
+ 
+#V*(30, A): 
+V_30_A <- (1/v(30))*((-1)*premium_yearly*s1 + D*s2)
+V_30_A
+
+#V_[disabeld](30,A): 
+
+s3 <- 0 
+for (i in 1:(length(v_ages)-1)){
+  s3 <- s3 + v_ages[i]*sol[2,2,][i]*h #disability i.e dis -> dis
+}
+
+
+#V_[disabeld](30,A): 
+V_30_dis <- (1/v(30))*D*s3
+V_30_dis
+
+```
+
+
+\newpage 
+## Exercise 4.6 
+Required-libraries
+```{r, message=FALSE}
+list.of.packages <- c("tidyverse", "scales")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+library(tidyverse)
+library(scales)   #nice formatting of plots
+```
+
+We are dealing with an endownment policy, in discrete time, this means that $S = \{*, \dagger\}$, the contractual information provided is: 
+```{r}
+x <- 35     #age
+T <- 25     #length of contract
+r <- 0.035  #interest rate 
+E <- 125000 #endownment 
+B <- 250000 #death-benfit
+```
+
+futhermore the force of mortality is given by: 
+```{r}
+mu <- function(t){
+  return(0.0015 + 0.0004*(t-35))
+}
+```
+
+discount-factor:
+```{r}
+v <- function(t){
+  return(exp(-r*t))
+}
+```
+
+
+
+We can also calulate the survival probability: 
+$$\begin{aligned}
+p_{**}(s,t) &= \exp\left(-\int_{s}^{t}\mu_{*\dagger}(u)du\right)
+\end{aligned}$$
+
+```{r}
+p_surv <- function(s,t){
+  integral <- 0.0015*(t-s) + 0.0004*((1/2)*(t^2 -s^2) + 35*(s-t))
+  return(exp(-integral))
+}
+p_surv(35,36)
+```
+
+We are asked to calculate the yearly premium $\pi$, but first we start by defining the policy functions specified in the contract.
+
+$$\begin{aligned}
+a_{*}^{Pre}(n) &= \begin{cases}
+-\pi &, n = 0, \dots, T-1 \\ 
+E&, n=T
+\end{cases}
+\;\;\;
+a_{*\dagger}^{Post}(n) &= \begin{cases}
+B &, n = 0, \dots, T-1 \\ 
+0&, else
+\end{cases}
+\end{aligned}$$
+
+We can now start to calculate the reserves, but we must be aware of what happens at $n = T$: 
+
+$$\begin{aligned}
+V_{*}^{+}(t,A) &= \frac{1}{v(t)}\left[
+\sum_{n=t}^{T}v(n)p_{**}(x+t,x+n)a_{*}^{Pre}(n) 
++ \sum_{n=t}^{T-1}v(n+1)p_{**}(x+t, x+n)p_{*\dagger}(x+n, x+n+1)a_{*\dagger}^{Post}(n)
+\right] \\ 
+&= \frac{1}{v(t)}\left[\alpha + \beta \right]
+\end{aligned}$$
+
+
+Here $\alpha$ corresponds to the first sum, and $\beta$ corresponds to the second sum: 
+$$\begin{aligned}
+\alpha &= \sum_{n=t}^{T-1}v(n)p_{**}(x+t, x+n)(-\pi) + v(T)p_{**}(x+t, x+T)E \\ 
+\beta &= \sum_{n=t}^{T-1}v(n+1)p_{**}(x+t, x+n)p_{*\dagger}(x+n, x+n+1)B
+\end{aligned}$$
+
+
+We will now use the equivalence principle, which states that the fair premium
+$\pi$ should be such that $V_{*}(0,A) = 0$, and using this method we end up with: 
+$$\begin{aligned}
+\pi &= \frac{v(T)p_{**}(x,x+T)E + B\sum_{n=0}^{T-1}v(n+1)p_{**}(x,x+n)p_{*\dagger}(x+n,x+n+1)}{\sum_{n=0}^{T-1}v(n)p_{**}(x,x+n)}
+\end{aligned}$$
+
+```{r}
+res1 <- 0 
+for (n in 0:(T-1)){
+  res1 <- res1 + v(n+1)*p_surv(x, x+n)*(1-p_surv(x+n, x+n+1))
+}
+
+res2 <- 0 
+for (n in 0:(T-1)){
+  res2 <- res2 + v(n)*p_surv(x, x+n)
+}
+
+above <- B*res1 + v(T)*p_surv(x,x+T)*E #whats above in the premium expression
+below <- res2            #whats below in the premium expression
+
+premium_yearly <- above/below
+premium_yearly
+
+```
+We now also want the prospective reserves: i.e $V_{*}^{+}(t,A)$ for $t = 0, \dots , T$:
+
+
+```{r}
+#Present value of reserve when including premiums. 
+V_reserve_1 <- function(x=35, E = 125000 , T=25){
+  #x: age of insured
+  #B: benefit specified in contract
+  #T: length of contract 
+  
+  V_star_pre <- NULL
+  for (t in 0:(T-1)){
+    s <- 0 
+    for (n in t:(T-1)){
+      s <- s + (1/v(t))*(-1)*premium_yearly*v(n)*p_surv(t+x, n+x)
+    }
+    V_star_pre[t+1] <- s  + (1/v(t))*v(T)*p_surv(x+t, x+T)*E 
+  }
+  V_star_pre[T+1] <- E #specified by contract 
+  return(V_star_pre)
+} 
+```
+
+\newpage
+
+```{r}
+
+V_reserve_2 <- function(x=35, B=250000, T=25){
+  #x: age of insured
+  #B: benefit specified in contract
+  #T: length of contract 
+  
+  V_star_post <- NULL
+  for (t in 0:(T-1)){
+    s <- 0 
+    for (n in t:(T-1)){
+      s <- s + (1/v(t))*B*v(n+1)*p_surv(x+t, x+n)*(1-p_surv(x+n, x+n+1))
+    }
+    V_star_post[t+1] <- s 
+  }
+  V_star_post[T+1] <- 0 #specified by contract
+  return(V_star_post)
+}
+
+reserve_total <- V_reserve_1() + V_reserve_2()
+reserve_total
+
+``` 
+
+```{r, echo=FALSE}
+df <- data.frame(seq(0,T,1), reserve_total)
+colnames(df) <- c("age_contract", "reserve_total") 
+#df
+
+fig1 <- df %>% 
+  ggplot(aes(x=age_contract, y = reserve_total)) + 
+  geom_line() + 
+  scale_y_continuous(labels = dollar) + 
+  xlab("Age of contract") + 
+  ylab("Total reserve")
+
+fig1
+
+#p1 <- ggplotly(fig1)
+#p1
+```
+
+
