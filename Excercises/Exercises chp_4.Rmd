@@ -2,16 +2,18 @@
 title: "Exerciseses chapter 4"
 author: "Andreas Slåttelid"
 date: "23/2/2022"
-output: 
+output:
+  html_document:
+    df_print: paged
   pdf_document:
-    keep_tex: true
+    keep_tex: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Exercise 4.3
+## Exercise 4.2 + 4.3
 
 In this exercise we are considering a disability insurance, hence $S = \{*,\diamond ,\dagger \}$. The contractual information given are: as follows: 
 
@@ -152,6 +154,120 @@ V_30_dis <- (1/v(30))*D*s3
 V_30_dis
 
 ```
+
+\newpage
+## Exercise 4.5 Permanent disability insurance discrete time
+We have the following state space $S = \{*, \diamond, \dagger\}$. Furthermore the contractual information provided is: 
+```{r}
+x <- 45 
+T <- 20 
+D <- 12000
+r <- 0.03
+
+#discount factor
+v <- function(t){
+  return(exp(-r*t))
+}
+```
+
+## i) 
+
+In this case we have the following transition rates: 
+$$\begin{aligned}
+\mu_{*\diamond}(t) = 0.0279 \;\; \mu_{*\dagger}(t) = 0.0229 \;\; \mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t) 
+\end{aligned}$$
+```{r}
+#1: alive 
+#2: disabled
+#3: dead
+m12 <- 0.0279 
+m13 <- 0.0229
+m11 <- -(m12+m13)
+m21 <- 0
+m23 <- 0.0229
+m22 <- -(m21+m23)
+m31 <- m32 <- m33 <- 0
+```
+
+Since reactivation is not allowed, we can actually solve the transition-probabilites directly. We first start with the survival probability: 
+$$p_{11}(t,s) = \exp((-1)*0.0508(s-t))$$
+```{r}
+p_11 <- function(t,s){
+  return(exp(-1*0.0508*(s-t)))
+}
+```
+
+
+We describe the policy functions: 
+$$\begin{aligned}
+a_{*}^{Pre}(n) &= \begin{cases}
+-\pi &, n = 0, \dots, T-1 \\ 
+0&,else
+\end{cases}
+\;\;\;
+a_{\diamond}^{Pre}(n) &= \begin{cases}
+D &, n = 0, \dots, T-1 \\ 
+0&, else
+\end{cases}
+\end{aligned}$$
+
+And we get the following formula for the reserve: 
+
+$$\begin{aligned}
+V_{*}^{+}(t,A) &=
+\frac{1}{v(t)}\left[
+-\pi\sum_{n=t}^{T-1}v(n)p_{**}^{x}(t,n) + D\sum_{n=t}^{T-1}v(n)p_{*\diamond}^{x}(t,n)
+\right]
+\end{aligned}$$
+
+
+\newpage
+Now from the equivalence principle we should have that the premium $\pi$ should be decided so that $V_{*}^{+}(0,A) = 0$, this leaves us with: 
+
+$$\begin{aligned}
+\pi &= \frac{D\sum_{n=0}^{T-1}v(n)p_{*\diamond}^{x}(0,n)}{\sum_{n=0}^{T-1}v(n)p_{**}^{x}(0,n)}
+\end{aligned}$$
+
+
+We can use Kolmogorov's equations to find $p_{*\dagger}$ and $p_{*\diamond}$, as reactivation is not allowed, and $\mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t)$
+
+$$\begin{aligned}
+\partial_{s}p_{13}(t,s) &= p_{11}(t,s)\mu_{13}(s) + p_{12}(t,s)\mu_{23}(s)
+\end{aligned}$$
+Now, lets introduce the notation: $\hat{\mu}(u) = \mu_{23}(u) = \mu_{13}(u)$, we then have:
+$$\begin{aligned}
+\partial_{s}p_{13}(t,s) &= \left[p_{11}(t,s) + p_{12}(t,s)\right]\hat{\mu}(s), \;\;\; (p_{11} + p_{12} + p_{13} = 1) \\ 
+&= \left[1 - p_{13}(t,s)\right]\hat{\mu}(s)
+\end{aligned}$$
+We can now multiply by $(-1)$, and take the derivative of $1$ (which is zero), this gives us: 
+$$\begin{aligned}
+\partial_{s}[1-p_{13}(t,s)] &= (-1)*\left[1 - p_{13}(t,s)\right]\hat{\mu}(s) \\ 
+&\Downarrow \\ 
+p_{13}(t,s) &= 1 - e^{-\int_{t}^{s}\hat{\mu}(u)du} \\ 
+&\Downarrow \\ 
+p_{13}(t,s) &= 1 - e^{-\int_{t}^{s}\hat{\mu}(u)du} 
+\end{aligned}$$
+
+```{r}
+#alive to dead
+p_13 <- function(t,s){
+  return(1-exp((-1)*m13*(s-t)))
+}
+```
+
+
+
+
+\newpage
+s
+
+
+
+
+
+
+
+
 
 
 \newpage 

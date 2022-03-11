@@ -110,8 +110,8 @@
 \begin{document}
 \maketitle
 
-\hypertarget{exercise-4.3}{%
-\subsection{Exercise 4.3}\label{exercise-4.3}}
+\hypertarget{exercise-4.2-4.3}{%
+\subsection{Exercise 4.2 + 4.3}\label{exercise-4.2-4.3}}
 
 In this exercise we are considering a disability insurance, hence
 \(S = \{*,\diamond ,\dagger \}\). The contractual information given are:
@@ -272,6 +272,127 @@ on, and then use a Riemann-sum to compute the integrals: \[
 
 \newpage
 
+\hypertarget{exercise-4.5-permanent-disability-insurance-discrete-time}{%
+\subsection{Exercise 4.5 Permanent disability insurance discrete
+time}\label{exercise-4.5-permanent-disability-insurance-discrete-time}}
+
+We have the following state space \(S = \{*, \diamond, \dagger\}\).
+Furthermore the contractual information provided is:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}} \DecValTok{45} 
+\NormalTok{T }\OtherTok{\textless{}{-}} \DecValTok{20} 
+\NormalTok{D }\OtherTok{\textless{}{-}} \DecValTok{12000}
+\NormalTok{r }\OtherTok{\textless{}{-}} \FloatTok{0.03}
+
+\CommentTok{\#discount factor}
+\NormalTok{v }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(t)\{}
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{exp}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{r}\SpecialCharTok{*}\NormalTok{t))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{i}{%
+\subsection{i)}\label{i}}
+
+In this case we have the following transition rates: \[\begin{aligned}
+\mu_{*\diamond}(t) = 0.0279 \;\; \mu_{*\dagger}(t) = 0.0229 \;\; \mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t) 
+\end{aligned}\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#1: alive }
+\CommentTok{\#2: disabled}
+\CommentTok{\#3: dead}
+\NormalTok{m12 }\OtherTok{\textless{}{-}} \FloatTok{0.0279} 
+\NormalTok{m13 }\OtherTok{\textless{}{-}} \FloatTok{0.0229}
+\NormalTok{m11 }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\NormalTok{(m12}\SpecialCharTok{+}\NormalTok{m13)}
+\NormalTok{m21 }\OtherTok{\textless{}{-}} \DecValTok{0}
+\NormalTok{m23 }\OtherTok{\textless{}{-}} \FloatTok{0.0229}
+\NormalTok{m22 }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\NormalTok{(m21}\SpecialCharTok{+}\NormalTok{m23)}
+\NormalTok{m31 }\OtherTok{\textless{}{-}}\NormalTok{ m32 }\OtherTok{\textless{}{-}}\NormalTok{ m33 }\OtherTok{\textless{}{-}} \DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+Since reactivation is not allowed, we can actually solve the
+transition-probabilites directly. We first start with the survival
+probability: \[p_{11}(t,s) = \exp((-1)*0.0508(s-t))\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p\_11 }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(t,s)\{}
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{exp}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\SpecialCharTok{*}\FloatTok{0.0508}\SpecialCharTok{*}\NormalTok{(s}\SpecialCharTok{{-}}\NormalTok{t)))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+We describe the policy functions: \[\begin{aligned}
+a_{*}^{Pre}(n) &= \begin{cases}
+-\pi &, n = 0, \dots, T-1 \\ 
+0&,else
+\end{cases}
+\;\;\;
+a_{\diamond}^{Pre}(n) &= \begin{cases}
+D &, n = 0, \dots, T-1 \\ 
+0&, else
+\end{cases}
+\end{aligned}\]
+
+And we get the following formula for the reserve:
+
+\[\begin{aligned}
+V_{*}^{+}(t,A) &=
+\frac{1}{v(t)}\left[
+-\pi\sum_{n=t}^{T-1}v(n)p_{**}^{x}(t,n) + D\sum_{n=t}^{T-1}v(n)p_{*\diamond}^{x}(t,n)
+\right]
+\end{aligned}\]
+
+\newpage
+
+Now from the equivalence principle we should have that the premium
+\(\pi\) should be decided so that \(V_{*}^{+}(0,A) = 0\), this leaves us
+with:
+
+\[\begin{aligned}
+\pi &= \frac{D\sum_{n=0}^{T-1}v(n)p_{*\diamond}^{x}(0,n)}{\sum_{n=0}^{T-1}v(n)p_{**}^{x}(0,n)}
+\end{aligned}\]
+
+We can use Kolmogorov's equations to find \(p_{*\dagger}\) and
+\(p_{*\diamond}\), as reactivation is not allowed, and
+\(\mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t)\)
+
+\[\begin{aligned}
+\partial_{s}p_{13}(t,s) &= p_{11}(t,s)\mu_{13}(s) + p_{12}(t,s)\mu_{23}(s)
+\end{aligned}\] Now, lets introduce the notation:
+\(\hat{\mu}(u) = \mu_{23}(u) = \mu_{13}(u)\), we then have:
+\[\begin{aligned}
+\partial_{s}p_{13}(t,s) &= \left[p_{11}(t,s) + p_{12}(t,s)\right]\hat{\mu}(s), \;\;\; (p_{11} + p_{12} + p_{13} = 1) \\ 
+&= \left[1 - p_{13}(t,s)\right]\hat{\mu}(s)
+\end{aligned}\] We can now multiply by \((-1)\), and take the derivative
+of \(1\) (which is zero), this gives us: \[\begin{aligned}
+\partial_{s}[1-p_{13}(t,s)] &= (-1)*\left[1 - p_{13}(t,s)\right]\hat{\mu}(s) \\ 
+&\Downarrow \\ 
+p_{13}(t,s) &= 1 - e^{-\int_{t}^{s}\hat{\mu}(u)du} \\ 
+&\Downarrow \\ 
+p_{13}(t,s) &= 1 - e^{-\int_{t}^{s}\hat{\mu}(u)du} 
+\end{aligned}\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#alive to dead}
+\NormalTok{p\_13 }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(t,s)\{}
+  \FunctionTok{return}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\FunctionTok{exp}\NormalTok{((}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{)}\SpecialCharTok{*}\NormalTok{m13}\SpecialCharTok{*}\NormalTok{(s}\SpecialCharTok{{-}}\NormalTok{t)))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\newpage
+
+s
+
+\newpage
+
 \hypertarget{exercise-4.6}{%
 \subsection{Exercise 4.6}\label{exercise-4.6}}
 
@@ -282,6 +403,7 @@ Required-libraries
 \NormalTok{list.of.packages }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{, }\StringTok{"scales"}\NormalTok{)}
 \NormalTok{new.packages }\OtherTok{\textless{}{-}}\NormalTok{ list.of.packages[}\SpecialCharTok{!}\NormalTok{(list.of.packages }\SpecialCharTok{\%in\%} \FunctionTok{installed.packages}\NormalTok{()[,}\StringTok{"Package"}\NormalTok{])]}
 \ControlFlowTok{if}\NormalTok{(}\FunctionTok{length}\NormalTok{(new.packages)) }\FunctionTok{install.packages}\NormalTok{(new.packages)}
+
 \FunctionTok{library}\NormalTok{(tidyverse)}
 \FunctionTok{library}\NormalTok{(scales)   }\CommentTok{\#nice formatting of plots}
 \end{Highlighting}
@@ -460,6 +582,6 @@ We now also want the prospective reserves: i.e \(V_{*}^{+}(t,A)\) for
 ## [26] 1.250000e+05
 \end{verbatim}
 
-\includegraphics{Exercises-chp_4_files/figure-latex/unnamed-chunk-12-1.pdf}
+\includegraphics{Exercises-chp_4_files/figure-latex/unnamed-chunk-16-1.pdf}
 
 \end{document}
