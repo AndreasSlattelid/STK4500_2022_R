@@ -1,0 +1,350 @@
+---
+title: "Mandatory assignment STK4500 1 of 1"
+author: "andreksl"
+header-includes: \usepackage{bbm}
+output:
+  pdf_document:
+    extra_dependencies:
+    - bbm
+    - threeparttable
+    - dsfont
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Exercise 1
+## a)
+We start by showing that $\mu_{m\;m-1}(t) = m\mu(t)$ for $m\in S\setminus \{0\}$. 
+We have that $Z = \{Z_{t}\}_{t\geq 0}$ represents the number of people alive at time $t$, with state space $S = \{0, \dots, N\}$. We can define $Z_{t}$ as: 
+$$\begin{aligned}
+Z_{t} = \sum_{i=1}^{N}X_{t}^{(i)} \;\;\; 
+X_{t}^{(i)} = \begin{cases}
+1, &\text{person i is alive at time t} \\
+0, &\text{person i is dead at time t}
+\end{cases}
+\end{aligned}$$
+
+
+Since every person in the group have same age and mortality $\mu$, we get that: 
+$$\begin{aligned}
+\mu(t) &=\lim\limits_{h \downarrow 0}\frac{P(X_{t+h}^{(i)}=0|X_{t}^{(i)}=1)}{h}
+\end{aligned}$$
+
+
+Now by following the definition we get: 
+$$\begin{aligned}
+\mu_{m\;m-1}(t) &= \lim\limits_{h \downarrow 0} \frac{P(Z_{t+h}=m-1|Z_{t}=m)}{h}
+\end{aligned}$$
+By definition of conditional probability we have: 
+
+$$\begin{aligned}
+P(Z_{t+h}=m-1|Z_{t}=m) &= \frac{P(Z_{t+h}=m-1, Z_{t}= m)}{P(Z_{t}=m)}
+\end{aligned}$$
+
+
+Now let's work a bit with the sets: 
+$$\begin{aligned}
+\{Z_{t+h} = m-1, Z_{t} = m\} &= \bigcup_{i=1}^{m}\{ 
+X_{t+h}^{(i)} = 0, X_{t+h}^{(j)} = 1, j=1,\dots, m, j\neq i
+\} \\ 
+&= \bigcup_{i=1}^{m}\{ 
+X_{t+h}^{(i)} = 0, X_{t}^{(i)} = 1, X_{t+h}^{(j)} = 1, j=1,\dots, m, j\neq i
+\} \\ 
+&= \bigcup_{i=1}^{m}\{A^{(i)},B^{(i)},C^{(j)}\}
+\end{aligned}$$
+
+\newpage
+We have that $A^{(i)}\cap B^{(i)}$ is independent of 
+$C^{(j)} = \{X_{t+h}^{(j)} = 1, j=1,\dots, m, j\neq i\}$
+furthermore $\alpha_{i,j} = \{A^{(i)},B^{(i)},C^{(j)}\}$ is a disjoint sequence of sets, thus: 
+
+$$\begin{aligned}
+P(\{Z_{t+h} = m-1, Z_{t} = m\}) &= P\left(
+\bigcup_{i=1}^{m}\alpha_{i,j}
+\right) \\ 
+&= \sum_{i=1}^{m}P(\alpha_{i,j}) \\ 
+&= \sum_{i=1}^{m}P(X_{t+h}^{(i)}=0,X_{t}^{(i)}=1)P(X_{t+h}^{(j)}=1, j=1,\dots, m, i\neq j) \\ 
+&= \sum_{i=1}^{m}P(X_{t+h}^{(i)}=0|X_{t}^{(i)}=1)P(X_{t}^{(i)}=1)P(X_{t+h}^{(j)}=1, j=1,\dots, m, i\neq j)
+\end{aligned}$$
+
+
+Now the last two sets are independent, meaning that we get: 
+$$\begin{aligned}
+P(X_{t}^{(i)}=1)P(X_{t+h}^{(j)}=1, j=1,\dots, m, i\neq j) 
+&= P((X_{t}^{(i)}=1,X_{t+h}^{(j)}=1, j=1,\dots, m, i\neq j) \\ 
+&= P(Z_{t}=m)
+\end{aligned}$$
+This leaves us with: 
+$$\begin{aligned}
+P(\{Z_{t+h} = m-1, Z_{t} = m\}) &= \sum_{i=1}^{m}P(X_{t+h}^{(i)}=0|X_{t}^{(i)}=1)P(Z_{t}=m)
+\end{aligned}$$
+
+This gives us the desired result: 
+$$\begin{aligned}
+\mu_{m \; m-1}(t) &= \lim\limits_{h\downarrow 0}\frac{P(\{Z_{t+h} = m-1, Z_{t} = m\})}{P(\{Z_{t} = m\})} \\ 
+&= \sum_{i=1}^{m}\lim\limits_{h\downarrow 0}P(X_{t+h}^{(i)}=0|X_{t}^{(i)}=1)P(Z_{t}=m)\frac{1}{P(Z_{t}=m)} \\ 
+&=\sum_{i=1}^{m}\mu(t) \\ 
+&= m\mu(t)
+\end{aligned}$$
+
+We are now asked to show that $\mu_{mn}(t) = 0$ for $|m-n|\geq 2$, let's assume that $N=2$, so that i can manage this exercise: 
+$$\begin{aligned}
+\mu_{20}(t) &= \lim\limits_{h\downarrow 0}\frac{p_{20}(t,t+h)}{h}
+\end{aligned}$$ 
+Let's work with the probability in this case: 
+
+$$\begin{aligned}
+p_{20}(t,t+h) &= P(Z_{t+h}=0|Z_{t}=2) \\ 
+&= P(X_{t+h}^{(2)} = \dagger,X_{t+h}^{(1)} = \dagger|X_{t}^{(2)} = *,X_{t}^{(1)} = *) \\ 
+&= P(X_{t+h}^{(2)}=\dagger|X_{t}^{(2)}=*, X_{t}^{(1)}=*)\times
+P(X_{t+h}^{(1)}=\dagger|X_{t}^{(2)}=*, X_{t}^{(1)}=*) \\ 
+&= P(X_{t+h}^{(2)}=\dagger|X_{t}^{(2)}=*)\times
+P(X_{t+h}^{(1)}=\dagger|X_{t}^{(1)}=*) 
+\end{aligned}$$
+Here we used the fact that lives are independet, as well as the Markov property. Now letting $h\to 0$, we get: 
+$$\begin{aligned}
+\lim\limits_{h\downarrow 0} P(X_{t+h}^{(2)}=\dagger|X_{t}^{(2)}=*) = 0
+\end{aligned}$$
+
+This leaves us with: 
+$$\begin{aligned}
+\mu_{20}(t) = 0
+\end{aligned}$$
+
+
+
+## b)
+We are asked to argue for why $p_{mn}(t,s) = 0$ for $n\geq m+1$, this follows from the fact that if this were not the case we would let the transition $\dagger \to *$ to be allowed. Hence this needs to be zero. 
+
+
+We were also asked to argue for $n\leq m$ that: 
+$$\begin{aligned}
+p_{mn}(t,s) &= {m\choose n}p(t,s)^{n}[1-p(t,s)]^{m-n}
+\end{aligned}$$
+This follows from the fact that we have a group of friends with same age, same mortality $\mu$ and the fact that they have independent lives. We thus get a sequence of independent Bernoulli trials where we have the same probability of success(survival) and failure(death), when we then sum up the number of success in $[t,s]$ we get a Binomial-distribution, and hence the probability is as above. 
+
+
+## c) 
+We assume that $\int_{0}^{\infty}\mu(u)du = \infty$, this means that 
+$$p(0,\infty) = \lim\limits_{s\to \infty}p(0,s) = \lim\limits_{s\to \infty}e^{\int_{0}^{s}\mu(u)du} = 0  $$
+Now, lets look at the sets again: 
+$$\begin{aligned}
+\{Z_{s} = 0\} &= \bigcap_{i=0}^{N}\{X_{s}^{(i)} = \dagger\} \\ 
+&\Downarrow \\ 
+P(\{Z_{s} = 0\}) &= P\left(\bigcap_{i=0}^{N}\{X_{s}^{(i)} = \dagger\}\right) = \prod_{i=1}^{N}P(\{X_{s}^{(i)} = \dagger\}) = (1-p(0,s))^{N}
+\end{aligned}$$
+
+Now, if we apply the limit on the sets: 
+$$\begin{aligned}
+P(\lim\limits_{s\to \infty}Z_{s}=0) &= \left(1 - \lim\limits_{s\to \infty}p(0,s)\right)^{N} = (1-p(0,\infty))^{N} = 1
+\end{aligned}$$
+
+\newpage
+
+
+# Exercise 2
+In this exercise we are considering a socalled Tontine of Friends in Continous time. We are dealing with a regular continous markov chain $X$ consisting of a total of $N$ friends. We focus on one of the participants called the chosen one referred to as $C1$. 
+
+
+Our state space $S$ looks like the following: 
+$$
+S = \{0,1, \dots, N-1\}\times\{*, \dagger\}
+$$
+We also use the convention that $(m,*)$ means: $m$ participants in the group except $C1$ are alive and the chosen one, $C1$ is alive. 
+$(m, \dagger)$ means that $m$ participants in the gruop except $C1$ are alive, while $C1$ is dead. 
+
+
+## a) Transition Probabilities
+We are asked to argue for the following: 
+$$\begin{aligned}
+\mu_{(m, *)(m-1,\dagger)}(t) &= 0 \\ 
+\mu_{(m, *)(m-1,*)}(t) &= \mu_{(m, \dagger)(m-1,\dagger)}(t) = m\mu(t)
+\end{aligned}$$
+
+
+$\mu_{(m, *)(m-1,\dagger)}(t) = 0$ means that the group consisting of $m$ persons goes to $m-1$ i.e one has died, and also at the same time $C1$ have gone from $*$ to $\dagger$. This is zero as it represents instantanoius jumps of size two immideately. 
+
+$\mu_{(m, *)(m-1,*)}(t) = \mu_{(m, \dagger)(m-1,\dagger)}(t) = m\mu(t)$: 
+$\mu_{(m, *)(m-1,*)}(t)$: the group goes from $m\to m-1$, while $*\to *$. 
+From **Exercise 1** we have that the lives are assumed to be stochastically independent, same age and have the same force of mortality $\mu(t)$. 
+Now: if the group goes from $m\to m-1$ and $C1$ remains in $*$ we have that there are $m\choose m-1$ ways to go from $m$ to $m-1$, and given the fact that all have same force of mortality we get: 
+$\mu_{(m, *)(m-1,*)}(t)$ = $m \choose m-1$ $\mu(t) = m\mu(t)$. 
+Exact same argument applies for $\mu_{(m, \dagger)(m-1,\dagger)}(t)$. 
+
+
+$\mu_{(m,*)(m,\dagger)}(t)$: the group remians of $m$ people, while $C1$ has gone from $* \to \dagger$, given the fact that all were assumed to have the same mortality rate we get: $\mu_{(m,*)(m,\dagger)}(t) = \mu(t)$
+
+
+We also have that $p_{(m,j)(n,j)}(t,s) = 0$ for $m,n \in \{0, \dots, N-1\}$ 
+$n\geq m+1, j\in \{*, \dagger\}$, if this probability was non-zero we would allowd for the transition $\dagger \to *$, which is not reasonable, hence this probability is zero. 
+
+
+\newpage
+We now let $n\leq m$, we then have:
+$$\begin{aligned}
+p_{(m,*)(n,*)}(t,s) &= {m\choose n}p(t,s)^{n+1}[1-p(t,s)]^{m-n} 
+\end{aligned}$$
+
+We here have that all individuals have the same survival-probability $p(t,s)$ 
+$$\begin{aligned} 
+p_{(m,*)(n,*)}(t,s) &= P[\text{Group goes from m to n in [t,s]}, \text{C1 remains in * for [t,s]} ]\\ 
+\stackrel{indep.lives}{=}& P[\text{Group goes from m to n in [t,s]}]P[\text{C1 remains in * for [t,s]}] \\ 
+&= {m \choose n}p(t,s)^{n}[1-p(t,s)]^{m-n}\times p(t,s) \\ 
+&= {m \choose n}p(t,s)^{n+1}[1-p(t,s)]^{m-n}
+\end{aligned}$$
+
+We also have: 
+
+$$\begin{aligned} 
+p_{(m,*)(n,*)}(t,s) &= P[\text{Gruop goes from m to n in [t,s]}, \text{C1 goes from alive to dead in [t,s]} ]\\ 
+\stackrel{indep.lives}{=}& P[\text{Gruop goes from m to n in [t,s]}]P[\text{C1 goes from alive to dead in [t,s]}] \\ 
+&= {m \choose n}p(t,s)^{n}[1-p(t,s)]^{m-n}\times [1 - p(t,s)] \\ 
+&= {m \choose n}p(t,s)^{n}[1-p(t,s)]^{m-n+1}
+\end{aligned}$$
+
+## b) 
+We have that the contract starts at $t=0$, and that all participants pay a single premium $\pi_{0}$ at this time. These premiums are invested into a fund, which we will regard as a stocastich process $S = \{S(t), t\geq 0\}$, which looks like 
+$$S(t) = S(0)e^{\rho t}$$
+Furthermore the fund will not start paying out until we reach $t = T_{0}$, where after $t\geq T_{0}$ will have the value: $S(t) = S(0)e^{\rho T_{0}}$ with a constant interest rate $r>0$, we are asked to derive $a_{(m,*)}(s)$, when we do not consider premiums.
+
+$$\begin{aligned}
+a_{(m,*)}(t) &= 
+\begin{cases}
+0 &, t\in [0,T_{0}) = 0 \\ 
+\frac{\rho t S(0)e^{\rho T_{0}}}{m+1} &, t\geq T_{0}
+\end{cases}
+\end{aligned}$$
+
+
+## c)
+In this exercise we are asked to calcualte the reserves, we first start off by remembering the formula applicable to our situation, and then translate it into our setting: 
+
+$$\begin{aligned}
+V_{i}^{+}(t,A) &= \frac{1}{v(t)}\left[
+\sum_{j\in S}\int_{t}^{\infty}v(s)p_{ij}^{x}(t,s)da_{j}(s)
+\right]
+\end{aligned}$$
+
+
+Now translating this into our setting: 
+$$\begin{aligned}
+V_{(m,*)}^{+}(t) &= \sum_{n=0}^{m}\int_{t}^{\infty}\frac{v(s)}{v(t)}p_{(m,*)(n,*)}(t,s)da_{(n,*)}(s) \\ 
+&= \sum_{n=0}^{m}\int_{t}^{\infty}\frac{v(s)}{v(t)}p_{(m,*)(n,*)}(t,s)
+\mathbbm{1}_{[t\geq T_{0}]}\frac{\rho S(0)e^{\rho T_{0}}}{n+1}ds \\ 
+&= \rho S(0)e^{\rho T_{0}}\sum_{n=0}^{m}\int_{t \vee T_{0}}^{\infty}{m\choose n}\frac{p(t,s)^{n+1}[1-p(t,s)]^{m-n}}{n+1}e^{-r(s-t)}ds
+\end{aligned}$$
+
+
+## d) 
+
+By Fubini we have: 
+$$\begin{aligned}
+V_{(m,*)}^{+} &= \rho S(0)e^{\rho T_{0}}\int_{t\vee T_{0}}^{\infty}\sum_{n=0}^{m}{m\choose n}\frac{p(t,s)^{n+1}(1-p(t,s))^{m-n}}{n+1}e^{-r(s-t)}ds
+\end{aligned}$$
+
+
+Let $X\sim Bin(m,p)$, then: 
+$$\begin{aligned}
+E\left[\frac{1}{1+X}\right] &= \sum_{n=0}^{m}{m\choose n}\frac{p^{n}(1-p)^{m-n}}{n+1}
+\end{aligned}$$
+We also have: 
+$$\begin{aligned}
+E\left[\frac{1}{1+X}\right] &= \frac{1-(1-p)^{m+1}}{(m+1)p}
+\end{aligned}$$
+
+This means that we can rewrite $V_{(m,*)}^{+}(t)$: 
+$$\begin{aligned}
+V_{(m,*)}^{+}(t) &= \rho S(0)e^{\rho T_{0}}\int_{t\vee T_{0}}^{\infty}pE\left[\frac{1}{1+X}\right]e^{-r(s-t)}ds \\ 
+&= \frac{\rho S(0)e^{\rho T_{0}}}{m+1}\int_{t\vee T_{0}}^{\infty}(1-(1-p(t,s))^{m+1})e^{-r(s-t)}ds
+\end{aligned}$$
+
+
+## e) 
+We start with the single premium $\pi_{0}$: 
+According to the equivalence principle, we have that: 
+$$\begin{aligned}
+\pi_{0} &= V_{(N-1,*)}^{+}(0) = \frac{\rho S(0)e^{\rho T_{0}}}{N}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{N})e^{-rs}ds
+\end{aligned}$$
+
+We also want the yearly premiums, from lecture notes we have: 
+$V_{*}^{+}(t,A) = V_{*}^{+}(t, A_{*}) +V_{*}^{+}(t, \tilde{A_{*}})$
+Where we in the first expression do not consider premiums, and in the other we only care about premiums, i.e $a_{(m,*)}(t)$ remains, while: 
+$$\begin{aligned}
+\tilde{a}_{(m,*)}(t) &= \begin{cases}
+-\pi t &, t\in [0,T_{0}) = 0 \\ 
+-\pi T_{0} &, t\geq T_{0}
+\end{cases}
+\end{aligned}$$
+
+with $\dot{\tilde{a}}_{(m,*)}(t) = -\pi$ for $t\in (0,T_{0})$ 
+Now, we get the following: 
+$$\begin{aligned}
+V_{(m,*)}^{+}(t,\tilde{A}) &= \frac{1}{v(t)}\int_{t}^{T_{0}}v(s)p_{(m,*)(n,*)}(t,s)(-\pi ds)\\ 
+&= -\pi \int_{t}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(t,s)^{n+1}(1-(p(t,s))^{m-n})ds
+\end{aligned}$$
+
+
+Now translating the above idea, we get: 
+$$V_{(m,*)}^{+}(t,A) = V_{(m,*)}^{+}(t,A_{*}) + V_{(m,*)}^{+}(t,\tilde{A}_{*})   $$
+And by the equivalence principle we will set
+$$V_{(m,*)}^{+}(0,A) = V_{(m,*)}^{+}(0,A_{*}) + V_{(m,*)}^{+}(0,\tilde{A}_{*}) = 0   $$ and solve for $\pi$, leading to: 
+
+$$\begin{aligned}
+0 &= \frac{\rho S(0)e^{\rho T_{0}}}{m+1}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{m+1})e^{-rs}ds -\pi\int_{0}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(0,s)^{n+1}(1-p(0,s))^{m-n}ds \\ 
+&\Downarrow \\ 
+\pi &= \frac{\frac{\rho S(0)e^{\rho T_{0}}}{m+1}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{m+1})e^{-rs}ds}{\int_{0}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(0,s)^{n+1}(1-p(0,s))^{m-n}ds}
+\end{aligned}$$
+
+
+## f) Thiele's equation 
+
+$$\begin{aligned}
+\frac{d}{dt}V_{i}^{+}(t) &= r(t)V_{i}^{+}(t)-\dot{a}_{i}(t) - \sum_{j\neq i}\mu_{ij}^{x}(t)(a_{ij}(t)+V_{j}^{+}(t)-V_{i}^{+}(t)) \\ 
+&\Downarrow \\ 
+\frac{d}{dt}V_{(m,*)}^{+}(t) &= r(t)V_{(m,*)}^{+}(t) - \frac{\rho S(0)e^{\rho  T_{0}}}{m+1} -\left(
+\mu_{(m,*)(m,\dagger)}^{x}(t)(-V_{(m,*)}^{+}(t))
++ \mu_{(m,*)(m-1,*)}[V_{(m-1,*)}^{+}(t)-V_{(m,*)}^{+}(t)]\right) \\ 
+&= r(t)V_{(m,*)}^{+}(t) - \frac{\rho S(0)e^{\rho  T_{0}}}{m+1} +
+\mu^{x}(t)V_{(m,*)}^{+}(t) - m\mu^{x}(t)[V_{(m-1,*)}^{+}(t)-V_{(m,*)}^{+}(t)] \\ 
+&= \left[
+r(t)+(m+1)\mu^{x}(t)
+\right]V_{(m,*)}^{+}(t) - \frac{\rho S(0)e^{\rho T_{0}}}{m+1} - m\mu^{x}(t)V_{(m-1,*)}^{+}(t)
+\end{aligned}$$
+With final condition: $V_{(m,*)}^{+}(T) = 0$
+
+\newpage
+## g) Numerical example: 
+We start off by the contractual information: 
+```{r}
+r   <- 0.03   #interest-rate
+rho <- 0.07   
+S0  <- 100000 
+N   <- 10     #number of person 
+x   <- 30     #age of insured
+T0  <- 40     #withdrawal
+T   <- 90     #length of contract
+G   <- 0      #Gender = male
+Y   <- 2022   #Year
+```
+
+We were also asked to use the mortalities proposed by Finanstilsynet: 
+```{r}
+w <- function(G, x){
+  if(G==0){
+    return( min(2.671548-0.17248*x+0.001485*x^2,0) )
+  }
+  if(G==1){
+    return( min(1.287968-0.10109*x+0.000814*x^2,0) )
+  }
+}
+```
+
+
+
+
+
+
+
