@@ -126,6 +126,41 @@ p_{mn}(t,s) &= {m\choose n}p(t,s)^{n}[1-p(t,s)]^{m-n}
 \end{aligned}$$
 This follows from the fact that we have a group of friends with same age, same mortality $\mu$ and the fact that they have independent lives. We thus get a sequence of independent Bernoulli trials where we have the same probability of success(survival) and failure(death), when we then sum up the number of success in $[t,s]$ we get a Binomial-distribution, and hence the probability is as above. 
 
+We are also asked to show that $s \mapsto p_{mn}(t,s)$ satisfy Kolmogorov's forward equation: 
+We start by stating how the equation looks like in this situation: 
+$$\begin{aligned}
+\frac{d}{ds}p_{mn}(t,s) &= -p_{mn}(t,s)\mu_{n}(s) + \sum_{k\neq m}p_{mk}(t,s)\mu_{kn}(s) \\ 
+&= p_{mn}(t,s)\mu_{nn}(s) +p_{m\;n+1}(t,s)\mu_{n+1\;n}(s)
+\end{aligned}$$
+We now recall that the row sum of the transition rate matrix is zero as well as the fact from **a)**: 
+$$\begin{aligned}
+\mu_{n\;n-1}(s) + \mu_{nn} &= 0 \\ 
+&\Downarrow \\ 
+\mu_{nn}(s) &= -\mu_{n\;n-1}(s) = -n\mu(s)
+\end{aligned}$$
+
+Thus we now end up with the followin equation: 
+$$\begin{aligned}
+\frac{d}{ds}p_{mn}(t,s) &= -n\mu(s)p_{mn}(t,s) + (n+1)\mu(s)p_{m\;n+1}(t,s)
+\end{aligned}$$
+
+We will now actually take the derivative of this thing: 
+$$\begin{aligned}
+\frac{d}{ds}p_{mn}(t,s) &= -{m \choose n}np(t,s)^{n-1}p(t,s)\mu(s)(1-p(t,s))^{m-n} 
++ {m \choose n}p(t,s)^{n}(m-n)(1-p(t,s))^{m-n-1}p(t,s)\mu(s) \\ 
+&= -n\mu(s)p_{mn}(t,s) + {m \choose n}(m-n)p(t,s)^{n+1}(1-p(t,s))^{m-n-1}\mu(s)
+\end{aligned}$$ 
+
+$$\begin{aligned}
+{m \choose n}(m-n) &= \frac{m!}{n!(m-n)!}(m-n) = \frac{m!}{n!(m-n-1)!} \\ &\Updownarrow \\ 
+{m \choose n}(m-n)\frac{n+1}{n+1} &= \frac{m!}{(n+1)!(m-n-1)!}(n+1)
+\end{aligned}$$
+This leaves us with: 
+$$\begin{aligned}
+\frac{d}{ds}p_{mn}(t,s) &= -n\mu(s)p_{mn}(t,s) +(n+1)\mu(s){m\choose n+1} p(t,s)^{n+1}(1-p(t,s))^{m-n-1} \\ 
+&= -n\mu(s)p_{mn}(t,s) +(n+1)\mu(s)p_{m\;n+1}(t,s)
+\end{aligned}$$
+
 
 ## c) 
 We assume that $\int_{0}^{\infty}\mu(u)du = \infty$, this means that 
@@ -283,19 +318,24 @@ with $\dot{\tilde{a}}_{(m,*)}(t) = -\pi$ for $t\in (0,T_{0})$
 Now, we get the following: 
 $$\begin{aligned}
 V_{(m,*)}^{+}(t,\tilde{A}) &= \frac{1}{v(t)}\int_{t}^{T_{0}}v(s)p_{(m,*)(n,*)}(t,s)(-\pi ds)\\ 
-&= -\pi \int_{t}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(t,s)^{n+1}(1-(p(t,s))^{m-n})ds
+&= -\pi \int_{t}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(t,s)^{n+1}(1-(p(t,s))^{m-n})e^{-r(s-t)}ds \\ 
+&= -\pi \int_{t}^{T_{0}}p(t,s)e^{-r(s-t)}ds
 \end{aligned}$$
 
 
 Now translating the above idea, we get: 
 $$V_{(m,*)}^{+}(t,A) = V_{(m,*)}^{+}(t,A_{*}) + V_{(m,*)}^{+}(t,\tilde{A}_{*})   $$
 And by the equivalence principle we will set
-$$V_{(m,*)}^{+}(0,A) = V_{(m,*)}^{+}(0,A_{*}) + V_{(m,*)}^{+}(0,\tilde{A}_{*}) = 0   $$ and solve for $\pi$, leading to: 
+$$
+V_{(N-1,*)}^{+}(0,A_{*}) - V_{(N-1,*)}^{+}(0,\tilde{A}_{*}) = 0
+$$
+and solve for $\pi$, leading to: 
 
 $$\begin{aligned}
-0 &= \frac{\rho S(0)e^{\rho T_{0}}}{m+1}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{m+1})e^{-rs}ds -\pi\int_{0}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(0,s)^{n+1}(1-p(0,s))^{m-n}ds \\ 
+0 &= \frac{\rho S(0)e^{\rho T_{0}}}{N}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{N})e^{-rs}ds
+-\pi \int_{t}^{T_{0}}p(t,s)e^{-r(s-t)}ds \\ 
 &\Downarrow \\ 
-\pi &= \frac{\frac{\rho S(0)e^{\rho T_{0}}}{m+1}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{m+1})e^{-rs}ds}{\int_{0}^{T_{0}}\sum_{n=0}^{m}{m \choose n}p(0,s)^{n+1}(1-p(0,s))^{m-n}ds}
+\pi &= \frac{\frac{\rho S(0)e^{\rho T_{0}}}{N}\int_{T_{0}}^{\infty}(1-(1-p(0,s))^{m+1})e^{-rs}ds}{\int_{0}^{T_{0}}p(0,s)e^{-rs}ds}
 \end{aligned}$$
 
 
@@ -332,15 +372,196 @@ Y   <- 2022   #Year
 
 We were also asked to use the mortalities proposed by Finanstilsynet: 
 ```{r}
-w <- function(G, x){
-  if(G==0){
-    return( min(2.671548-0.17248*x+0.001485*x^2,0) )
-  }
-  if(G==1){
-    return( min(1.287968-0.10109*x+0.000814*x^2,0) )
+#The weights given by finanstilsynet
+w <- function(G,u){
+  #men: G = 0
+  #woman: G = 1
+  #x: age in calender year t,
+  if (G==0){
+    return (min(2.671548-0.172480*u + 0.001485*u**2, 0))
+  } 
+  if (G==1){
+    return(min(1.287968-0.101090*u+ 0.000814*u**2,0))
   }
 }
+
+
+mu_kol_2013 <- function(G,u){
+  #men 
+  if (G==0){
+    return((0.241752+0.004536*10**(0.051*u))/1000)
+  }
+  #woman
+  if (G==1){
+    return((0.085411+0.003114*10**(0.051*u))/1000)
+  }
+} 
+
+mu_kol <- function(G,u,x,Y){
+  #G: gender
+  #x: age of insured
+  #Y: calender year Y>= 2013
+  return(mu_kol_2013(G,x+u)*(1+w(G,x+u)/100)**(Y+u-2013))
+}
+
+#survival prob for person aged x in year Y, t,s length of contract.
+p <- function(G,x,Y,t,s){
+  exp(-as.numeric(integrate(Vectorize(mu_kol),t,s, G=G, x=x, Y=Y)[1]))
+}
+
+temp_integrand <- function(s){
+  (1-(1-p(G,x,Y,0,s))^{N})*exp(-r*s)
+}
+
+integral <- as.numeric(integrate(Vectorize(temp_integrand),T0,800)[1])
+
+single_premium <- (rho*S0*exp(rho*T0)/N)*integral 
+
+single_premium
+
 ```
+
+
+```{r}
+temp_integrand_1 <- function(s){
+  (1-(1-p(0,x,Y,0,s))^{N})*exp(-r*s)
+}
+
+temp_integrand_2 <- function(s){
+  p(0,x,Y,0,s)*exp(-r*s)
+}
+
+integral1 <- as.numeric(integrate(Vectorize(temp_integrand_1),T0,800)[1])
+integral2 <- as.numeric(integrate(Vectorize(temp_integrand_2),0,T0)[1])
+
+above <- rho*S0*exp(rho*T0)/N*integral1
+below <- integral2
+
+yearly_premium <- above/below
+yearly_premium
+```
+
+```{r}
+#not including premiums:
+PV <- function(t,x, m){
+  temp_int <- function(s){
+    (1-(1-p(G,x,Y,t,s))^{N})*exp(-r*(s-t))
+  }
+  integral <- as.numeric(integrate(Vectorize(temp_int),max(t,T0),800)[1]) 
+  return((rho*S0*exp(rho*T0)/((m)+1))*integral)
+}
+
+#including premiums
+PV_premiums <- function(t,x){
+  temp_int <- function(s){
+    p(G,x,Y,t,s)*exp(-r*(t-s))
+  }
+  integral <- as.numeric(integrate(Vectorize(temp_int),t,max(t,T0))[1])
+  return(-yearly_premium*integral)
+} 
+
+time <- seq(0,100,1)
+PV_total <- NULL
+for (i in 1:length(time)){
+  PV_total[i] <- PV(i,x, N-1) + PV_premiums(i, x)
+}
+
+```
+
+
+```{r, echo = FALSE, message=FALSE}
+
+df <- data.frame(time, PV_total)
+colnames(df) <- c("length_contract", "PV_total")
+
+library(tidyverse)
+library(scales)
+
+df %>% 
+  ggplot(aes(x=length_contract, y = PV_total)) + 
+  geom_line() + 
+  scale_y_continuous(labels = dollar) + 
+  xlab("Age of contract") + 
+  ylab("Total reserve")
+```
+
+
+
+## i)
+
+```{r}
+#i) 
+m <- c(1,5,9)   #lives
+t <- c(1,40,60) #times
+
+PV_murder <- matrix(nrow = 3, ncol = 3)
+
+for (i in 1:length(t)){
+  for (j in 1:length(m))
+    PV_murder[i,j] <- PV(t[i], x, m[j]-1) - PV(t[i], x, m[j])
+}
+PV_murder
+```
+
+\newpage 
+## k) Comparison with annuity
+In this situation we have: $\bar{S} = \{*, \dagger\}$, furthermore we do get the following policy-function: 
+$$\begin{aligned}
+\bar{a}_{*}(t) &= \begin{cases}
+0, &t\in[0,T_{0}) \\ 
+Pt, &t\geq T_{0}
+\end{cases}
+\end{aligned}$$
+
+$$\begin{aligned}
+\bar{V}_{*}^{+}(t) &= \int_{t}^{\infty}\frac{v(s)}{v(t)}p(t,s)d\bar{a}_{*}(s) \\ 
+&= P\int_{t \vee T_{0}}^{\infty}p(t,s)e^{-r(t-s)}ds
+\end{aligned}$$
+From the equivalence principle we get: 
+$$\begin{aligned}
+\bar{V}_{*}^{+}(0) &= V_{(N-1,*)}^{+}(0) = \pi_{0} \\ 
+&\Downarrow \\ 
+P &= \frac{\pi_{0}}{\int_{T_{0}}^{\infty}p(0,s)e^{-rs}ds}
+\end{aligned}$$
+
+```{r, comparison with annuity, message=FALSE}
+temp_integrand_3 <- function(s){
+  p(G,x,Y,0,s)*exp(-r*s)
+}
+
+integral_3 <- as.numeric(integrate(Vectorize(temp_integrand_3),T0,800)[1])
+
+P <- single_premium/integral_3
+P 
+
+PV_pension <- function(t,x){
+  temp_int <- function(s){
+    p(G,x,Y,t,s)*exp(-r*(t-s))
+  }
+  integral <- as.numeric(integrate(Vectorize(temp_int),max(t,T0), 800)[1])
+  return(P*integral)
+} 
+
+t1 <- seq(30, 90, 1)
+Pension <- NULL
+for (i in 1:length(t1)){
+  Pension[i] <- PV_pension(t1[i], x)
+}
+Pension
+
+df2 <- data.frame(t1, Pension)
+colnames(df2) <- c("age_contract", "Value_pension")
+
+df2 %>% 
+  ggplot(aes(x=age_contract, y = Value_pension)) + 
+  geom_line() + 
+  scale_y_continuous(labels = dollar) + 
+  xlab("Age of contract") + 
+  ylab("PV Pension")
+      
+```
+
+
 
 
 
