@@ -1,0 +1,160 @@
+---
+title: "Exercises chapter 6"
+author: "Andreas Slåttelid"
+header-includes: \usepackage{bbm}
+output:
+  pdf_document:
+    extra_dependencies:
+    - bbm
+    - threeparttable
+    - dsfont
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+``` 
+
+
+## Exercise 6.2 
+
+We have the following contractual information: 
+```{r}
+T <- 10     #length of contract
+x <- 60     #age of insured
+D <- 20000  #disability pension while disabeld
+B <- 50000  #death benefit 
+r <- 0.05   #intensity rate
+```
+
+Where our state space is $S = \{*, \diamond, \dagger\}$, we have the following policy-functions: 
+$$\begin{aligned}
+a_{\diamond}(t) &= 
+\begin{cases}
+0, &t<0 \\
+Dt, &t\in[0,T) \\ 
+DT, &t\geq T
+\end{cases}
+\;\;
+a_{*\dagger}(t) =
+\begin{cases}
+B, &t\in[0,T) \\ 
+0, &else
+\end{cases}
+\end{aligned}$$
+Since we for now do not care about the premiums in the policy-functions, we get $$\dot{a}_{*}(t) = 0 $$ and $$\dot{a}_{\diamond}(t) = D\mathbbm{1}_{[0,T)}(t)$$
+
+
+We can set up thieles differential equations: 
+$$\begin{aligned}
+\frac{d}{dt}V_{*}^{+}(t) &= r(t)V_{*}(t) - \mu_{*\diamond}^{x}(t)[V_{\diamond}^{+}(t) - V_{*}^{+}(t)] - \mu_{*\dagger}^{x}(t)[B\mathbbm{1}_{[0,T)}(t) - V_{*}^{+}(t)] \\ 
+\frac{d}{dt}V_{\diamond}^{+}(t) &= r(t)V_{\diamond}(t) -D\mathbbm{1}_{[0,T)}(t) 
+- \mu_{*\diamond}^{x}(t)[V_{*}^{+}(t)-V_{\diamond}^{+}(t)] 
++ \mu_{\diamond \dagger}^{x}(t)V_{\diamond}^{+}(t)
+\end{aligned}$$
+With finial conditions: $V_{*}^{+}(T) = V_{\diamond}^{+}(T) = 0$
+
+In order to solve this numerically, we partition up $[0,T]$ in times $t_{i} = t_{0} + ih$, with $0 = t_{0} < \dots < t_{n} = T$.
+
+We also iterate backwards, giving us: 
+$$\begin{aligned}
+\frac{V_{*}^{+}(t_{i})- V_{*}^{+}(t_{i-1}) }{h} &= 
+rV_{*}(t_{i}) - \mu_{*\diamond}^{x}(t_{i})[V_{\diamond}^{+}(t_{i}) - V_{*}^{+}(t_{i})] - \mu_{*\dagger}^{x}(t_{i})[B - V_{*}^{+}(t_{i})]
+\end{aligned}$$
+
+We then solve for $V_{*}(t_{i-1})$, giving us: 
+$$\begin{aligned}
+V_{*}^{+}(t_{i-1}) &= V_{*}^{+}(t_{i}) - h\left[
+rV_{*}^{+}(t_{i}) - \mu_{*\dagger}^{x}(t_{i})[V_{\diamond}^{+}(t_{i})-V_{*}^{+}(t_{i})]
+- \mu_{*\dagger}^{x}(t)[B-V_{*}(t_{i})]
+\right]
+\end{aligned}$$ 
+
+We do the same for $V_{\diamond}^{+}(t_{i-1})$: 
+
+$$\begin{aligned}
+V_{\diamond}^{+}(t_{i-1}) &= V_{\diamond}^{+}(t_{i}) - h\left[
+rV_{\diamond}^{+}(t_{i})-D\mathbbm{1}_{[0,T)}(t) - \mu_{\diamond *}^{x}(t_{i})[V_{*}^{+}(t_{i})-V_{\diamond}^{+}(t_{i})]
++ \mu_{\diamond \dagger}^{x}(t_{i})V_{\diamond}^{+}(t_{i})
+\right]
+\end{aligned}$$
+
+
+
+```{r}
+#states 0:alive, 1:disabled, 2:dead
+
+mu01 <- function(u){
+  a1 <- 4*10^{-4}
+  b1 <- 3.4674*10^{-6}
+  c1 <- 0.138755
+  return(a1 + b1*exp(c1*u))
+}
+
+mu02 <- function(u){
+  a2 <- 5*10^{-4}
+  b2 <- 7.5858*10^{-5}
+  c2 <- 0.087498
+  return(a2 + b2*exp(c2*u))
+}
+
+mu12 <- function(u){
+  return(mu02(u))
+}
+
+mu10 <- function(u){
+  return(0.1*mu01(u))
+}
+
+```
+
+```{r}
+#a.e. derivative of a_{\diamond}(t)
+dis_dot <- function(t){
+  if(t >= 0 && t<T){ return(D) }
+  if(t>=T){ return(0) }
+}
+
+#PV of policy V0 and V1
+h <- 1/12
+N <- T/h
+
+PV_act <- PV_dis <- rep(0,N+1)
+PV_act[N+1] <- PV_dis[N+1] <- 0 #per definition of the policy
+
+for(i in N:1){
+  PV_act[i] <- PV_act[i+1] - h*(r*PV_act[i+1]
+                                - mu01(x+(i+1)*h)*(PV_dis[i+1]-PV_act[i+1])
+                                - mu02(x+(i+1)*h)*(B-PV_act[i+1])
+                                )
+  
+  PV_dis[i] <- PV_dis[i+1] - h*(r*PV_dis[i+1]- dis_dot((i+1)*h)
+                                - mu10(x+(i+1)*h)*(PV_act[i+1]-PV_dis[i+1])
+                                + mu12(x+(i+1)*h)*PV_dis[i+1]
+                                )
+} 
+```
+\newpage
+And from this we can find the one-time premium $\pi_{0} = V_{*}^{+}(0)$: 
+```{r}
+pi0 <- PV_act[1]
+pi0
+```
+We were asked to find the yearly premium $\pi$, we then use the method, where we create an artificial policy, where one pays a premium of NOK 1 during $[0,T)$, i.e this is the only contribution of interest, thus: 
+$$\begin{aligned}
+a_{*}^{Prem=1}(t) &= 
+\begin{cases}
+0, &t<0 \\
+-t, &t\in[0,T) \\ 
+-T, &t\geq T
+\end{cases}
+\;\;\implies 
+\dot{a}_{*}^{Prem =1}(t) = -1\mathbbm{1}_{[0,T)}(t) \\ 
+a_{\diamond}^{Prem=1}(t) &= 0, \; \forall t \;\; \implies \dot{a}_{\diamond}^{Prem = 1} 0
+\end{aligned}$$
+
+
+
+
+
