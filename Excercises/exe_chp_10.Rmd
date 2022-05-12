@@ -185,7 +185,6 @@ p_surv <- function(t,s){
   return(exp((-1)*integral))
 }
 
-p_surv(60,70)
 #Black&Scholes for call-option:
 BS <- function(t,T,St, K){
    d1 <- (log(St/K) + (r + sigma^2/2)*(T-t)) / (sigma*sqrt(T-t))
