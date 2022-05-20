@@ -1,0 +1,305 @@
+---
+title: "Exercises chapter 9"
+author: "Andreas Slåttelid"
+header-includes: \usepackage{bbm}
+output:
+  pdf_document:
+    extra_dependencies:
+    - bbm
+    - threeparttable
+    - dsfont
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+``` 
+
+
+## Exercise 9.2
+
+### i)
+We are asked to show that the solution to the GBM under $Q$ is given by: 
+$$\begin{aligned}
+S(t) &= S(0)\exp\left(
+(r-\frac{\sigma^{2}}{2})t
++ \sigma \widetilde{W}_{t}
+\right)
+\end{aligned}$$
+
+Now from arbitrage theory, we have that $\widetilde{S}_{t}$ is a $(Q,\mathcal{F})$-martingale, \
+here I just state the dynamics of $\widetilde{S}$ under $P$: 
+
+$$
+\begin{aligned}
+d(e^{-rt}S_{t}) &= 
+S_{t}e^{-rt}\sigma\left[
+\frac{\mu - r}{\sigma}dt + dW_{t}
+\right] \\ 
+&= 
+\widetilde{S}_{t}\sigma[\theta dt + dW_{t}]
+\end{aligned}$$
+
+From Girsanov's thm we have that $Z_{t}$ a martingale 
+$$\begin{aligned}
+Z_{t} &= \exp\left(
+\int_{0}^{t}\varphi_{s}dW_{s} 
+-\frac{1}{2}\int_{0}^{t}\varphi_{s}^{2}ds
+\right)
+\end{aligned}
+$$ 
+
+yields that $\widetilde{W}_{t} = W_{t} - \int_{0}^{t}\varphi_{s}ds$ is a $(Q,\mathcal{F})$-BM. 
+
+So combining the martingale representation theorem with a clever way of finding $\varphi_{s}$, we see that $\varphi_{t} = -\theta$, because, we then get that: 
+$$
+\widetilde{W}_{t} = W_{t}+\int_{0}^{t}\theta ds
+$$
+is a $(Q,\mathcal{F})$-BM. This gives us $W_{t} = \widetilde{W}_{t} - \theta t$, from theory we have that the solution to a GBM under $(P)$ is:  
+$$\begin{aligned}
+S(t) &= S(0)\exp\left(
+\left(\mu - \frac{1}{2}\sigma^{2} \right)t + \sigma W_{t}
+\right) \;\;(P) \\ 
+&= S(0)\exp\left(
+\left(\mu - \frac{1}{2}\sigma^{2} \right)t + \sigma (\widetilde{W}_{t} - \theta t)
+\right) \;\;(Q) \\ 
+&= S(0)\exp\left(
+\left(\mu - \frac{\sigma^{2}}{2} -\sigma \theta \right)t + \sigma \widetilde{W}_{t}
+\right) \\ 
+&= S(0)\exp\left(
+\left(r-\frac{\sigma^{2}}{2}\right)t
++ \sigma \widetilde{W}_{t}
+\right)
+\end{aligned}$$
+
+\newpage 
+### ii) 
+We are asked to find the price of the claim $X = \max(NS_{T},G)$, now from mathematical theory we have that the price is given by: 
+$$
+\pi(t) = e^{-r(T-t)}\mathbb{E}_{Q}[X|\mathcal{F}_{t}]
+$$
+The goal here is to use the explicit formula given by Black & Scholes: 
+$$
+BS(t,T,S_{t}, K) = e^{-r(T-t)}\mathbb{E}_{Q}[(S_{T}-K)^{+}|\mathcal{F}_{t}]
+$$
+
+where $(x)^{+} = \max(x,0)$, so let's do so, before we dig in, we show some useful tricks concerning the maximum: 
+$$\begin{aligned}
+\max(A,B) &= \max(B-A,0) + A \\
+\max(A,B) &= \max(A-B,0) + B \\ 
+\max(A,B) &= (A-B)^{+} + B
+\end{aligned}$$
+Hence: 
+
+
+$$\begin{aligned}
+\max(NS_{T},G) &= (NS_{T}-G)^{+} + G \\ 
+&\Downarrow \\ 
+\frac{\max(NS_{T},G)}{N} &= \left(S_{T}-\frac{G}{N}\right)^{+} + \frac{G}{N} \\ 
+&= Z + \frac{G}{N} \\ 
+&\Downarrow \\ 
+\max(NS_{T},G) &= NZ + G
+\end{aligned}$$
+
+Now let's use finance theory: 
+$$\begin{aligned}
+\pi(t) &= e^{-r(T-t)}\mathbb{E}_{Q}[X|\mathcal{F}_{t}] \\ 
+&= e^{-r(T-t)}\mathbb{E}_{Q}[( NZ + G)|\mathcal{F}_{t}] \\ 
+&= Ne^{-r(T-t)}\mathbb{E}_{Q}[Z|\mathcal{F}_{t}] + e^{-r(T-t)}G \\ 
+&= Ne^{-r(T-t)}\mathbb{E}_{Q}\left[\left(S_{T}-\frac{G}{N}\right)^{+}|\mathcal{F}_{t}\right] + e^{-r(T-t)}G \\ 
+&= N BS(t,T,S_{t}, G/N) + e^{-r(T-t)}G
+\end{aligned}$$
+
+\newpage 
+
+## Exercise 9.3 
+
+We are dealing with an endownment insurance, hence $S = \{*,\dagger\}$, the contractual information provided is: 
+```{r}
+T     <- 10    #length of contract
+x0    <- 60    #age of insured
+pi0   <- 10000 
+S0    <- 1
+beta  <- 0.005 #deduction charges
+r     <- 0.025 
+sigma <- 0.25  #volatility
+```
+
+From the text, we get: 
+$$\begin{aligned}
+C(T) &= \max((1-0.03)\pi_{0}S_{T}(1-\beta)^{T-1}, \pi_{0}) \\
+C(T) &= \max(NS_{T},\pi_{0}) \\ 
+C(T) &= N\left(S_{T}-\frac{\pi_{0}}{N}\right)^{+} + \pi_{0}
+\end{aligned}$$
+
+We also write down the policy functions, where we do not include premiums: 
+$$\begin{aligned}
+a_{*}(t) &= 
+\begin{cases}
+0, &t<0 \\
+0, &t\in[0,T) \\ 
+C(T), &t\geq T
+\end{cases}\;\; 
+a_{\dagger}(t) = 0 \;\; 
+a_{*\dagger}(t) = 0 \;\; 
+\dot{a}_{*}(t) = 0
+\end{aligned}$$
+
+We also recall what we mean by the B&S-notation: 
+$$\begin{aligned}
+BS(t,T,S_{t}, K) &= e^{-r(T-t)}\mathbb{E}_{Q}\left[
+\left(S_{T}-K\right)^{+}
+\bigg{|}\mathcal{F}_{t}
+\right]
+\end{aligned}$$
+
+
+This yields: 
+$$\begin{aligned}
+V_{*}^{+}(t,S_{t}) &= p_{**}^{x_{0}}(t,T)\frac{v(T)}{v(t)}\mathbb{E}_{Q}[C(T)|\mathcal{F}_{t}] \\ 
+&=  p_{**}^{x_{0}}(t,T)e^{-r(T-t)}\mathbb{E}_{Q}[N\left(S_{T}-\frac{\pi_{0}}{N}\right)^{+} + \pi_{0}|\mathcal{F}_{t}] \\ 
+&=
+p_{**}^{x_{0}}(t,T)Ne^{-r(T-t)}\mathbb{E}_{Q}\left[N\left(S_{T}-\frac{\pi_{0}}{N}\right)^{+}|\mathcal{F}_{t}\right] +  p_{**}^{x_{0}}(t,T)e^{-r(T-t)}\pi_{0} \\ 
+&= p_{**}^{x_{0}}(t,T)N BS(t,T,S_{t}, \pi_{0}/N) + p_{**}^{x_{0}}(t,T)e^{-r(T-t)}\pi_{0} \\ 
+&= p_{**}^{x_{0}}(t,T)\left[
+N BS(t,T,S_{t}, \pi_{0}/N) + e^{-r(T-t)}\pi_{0}
+\right]
+\end{aligned}$$
+
+\newpage
+
+```{r}
+#0: alive, 1:dead
+mu01 <- function(t){
+  A <- 0.0001
+  B <- 0.00035
+  c <- 1.075
+  return(A + B*c^{t})
+}
+
+#survival function:
+p_surv <- function(t,s){
+  f <- mu01
+  integral <- integrate(f, lower = t, upper = s)$value
+  return(exp((-1)*integral))
+}
+
+#Black&Scholes for call-option:
+BS <- function(t,T,St, K){
+   d1 <- (log(St/K) + (r + sigma^2/2)*(T-t)) / (sigma*sqrt(T-t))
+   d2 <- d1 - sigma*sqrt(T-t)
+   
+   value <- St*pnorm(d1) - K*exp(-r*(T-t))*pnorm(d2)
+   return(value)
+}
+
+V_reserve <- function(t, T,St){
+  
+  N <- (1-0.03)*pi0*(1-beta)^{(T-1)}
+  
+  reserve <- p_surv(t+x0, T+x0)*(N*BS(t,T,St,pi0/N) + exp(-r*(T-t))*pi0)
+  return(reserve)
+}
+#reserve at t=0 with S0 = 1
+V_reserve(t = 0, T = 10, St = 1)
+```
+
+## Exercise 9.4 
+In this exercise we are asked to see what happens to the reserve at time $t=6$, if: 
+
+i) Fund increases by 45% 
+
+ii) Fund increases by 5%
+
+```{r}
+#fund has increased by 45%: 
+V_reserve(t = 6, T = 10, St = 1.45)
+
+#fund has increased by 5%: 
+V_reserve(t = 6, T = 10, St = 1.05)
+
+```
+
+
+
+
+\newpage 
+## Exercise 9.5 
+We are considering a call option: $X = (S_{T}-K)^{+}$, furthermore the stock price follows a GBM: 
+$$
+dS_{t} = \mu S_{t}dt + \sigma S_{t}dW_{t}\;\;(P)
+$$
+We are asked to show that the claim value at time $t$ denoted $v(t,S_{t})$, satisfies the following PDE: 
+$$\begin{aligned}
+-\partial_{t}v + rv &= 
+\frac{1}{2}\sigma^{2}x^{2}\partial_{xx}v + rx\partial_{x}v
+\end{aligned}$$
+
+First of, by claim value at time t, we mean: 
+$$
+v(t,S_{t}) = e^{-r(T-t)}\mathbb{E}_{Q}[X|\mathcal{F}_{t}]
+$$
+This is an object we can trade, and form the fundamental theorem of asset-pricing we have that all tradable assets are $(Q,\mathcal{F})$-martingales after discounting.
+This means that: 
+$$
+\frac{v(t,S_{t})}{B_{t}}
+$$
+should be a martingale, here $B_{t} = \exp\left(\int_{0}^{t}r_{u}du\right)$, in our case we have a constant interest rate, meaning that $B_{t} = e^{rt}$.
+Our strategy is to use the martigale representation theorem, from which we can conclude that the $dt$-terms should be zero.
+
+$$\begin{aligned}
+d\left[\frac{v(t,S_{t})}{B_{t}}\right] &= 
+d\left[\frac{1}{B_{t}}\right]v(t,S_{t}) + \frac{1}{B_{t}}dv(t,S_{t}) + d\left[\frac{1}{B_{t}}\right]dv(t,S_{t}) \\ 
+&= d\left[\frac{1}{B_{t}}\right]v(t,S_{t}) + \frac{1}{B_{t}}dv(t,S_{t})
+\end{aligned}$$
+
+Since we work in $(Q)$-framework, we stat the dynamics of $S_{t}$ under $Q$ first: 
+$$
+dS_{t} = rS_{t}dt + \sigma S_{t}d\widetilde{W}_{t}\;\; (Q)
+$$
+We start with the easy one first: 
+$$
+d(e^{-rt}) = -re^{-rt}dt
+$$
+We will use Ito's formula on $v(t,x)$:
+$$\begin{aligned}
+dv(t,x) &= \partial_{t}vdt + \partial_{x}vdS_{t} + \frac{1}{2}\partial_{xx}v(dS_{t})^{2} \\ 
+&= \partial_{t}vdt + \partial_{x}v[rxdt + \sigma xd\widetilde{W}_{t}] 
++ \frac{1}{2}\partial_{xx}v\sigma^{2}x^{2}dt \\ 
+&= \left[
+\partial_{t}v + \partial_{x}vx + \frac{1}{2}\partial_{xx}v\sigma^{2}x^{2}
+\right]dt 
++ \partial_{x}vxd\widetilde{W}_{t}
+\end{aligned}$$
+
+This leaves us with: 
+$$\begin{aligned}
+d\left[\frac{v(t,S_{t})}{B_{t}}\right] &= 
+-re^{-rt}vdt + e^{-rt}\left(
+\left[
+\partial_{t}v + \partial_{x}vx + \frac{1}{2}\partial_{xx}v\sigma^{2}x^{2}
+\right]dt 
++ \partial_{x}vxd\widetilde{W}_{t}
+\right) \\ 
+&= 
+e^{-rt}\left[
+-rv + \partial_{t}v +rx\partial_{x}v + \sigma^{2}x^{2}\frac{1}{2}\partial_{xx}v
+\right]dt 
++ e^{-rt}x\partial_{x}vd\widetilde{W}_{t}
+\end{aligned}$$
+
+And then, combining the fundamental theorme of asset pricing with martingale representation theorem, we get that the $dt$-part must equal to zero, hence: 
+
+$$\begin{aligned}
+-\partial_{t}v + rv &= 
+\frac{1}{2}\sigma^{2}x^{2}\partial_{xx}v + rx\partial_{x}v
+\end{aligned}$$
+
+
+
+
+
+
+
+
