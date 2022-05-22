@@ -113,7 +113,7 @@ mu10 <- function(u){
 #a.e. derivative of a_{\diamond}(t)
 dis_dot <- function(t){
   if(t >= 0 && t<T){ return(D) }
-  if(t>=T){ return(0) }
+  if(t >= T){ return(0) }
 }
 
 #PV of policy V0 and V1
@@ -121,7 +121,7 @@ h <- 1/12
 N <- T/h
 
 PV_act <- PV_dis <- rep(0,N+1)
-PV_act[N+1] <- PV_dis[N+1] <- 0 #per definition of the policy
+PV_act[N+1] <- PV_dis[N+1] <- 0 #by construction of contract
 
 for(i in N:1){
   PV_act[i] <- PV_act[i+1] - h*(r*PV_act[i+1]
@@ -151,10 +151,72 @@ a_{*}^{Prem=1}(t) &=
 \end{cases}
 \;\;\implies 
 \dot{a}_{*}^{Prem =1}(t) = -1\mathbbm{1}_{[0,T)}(t) \\ 
-a_{\diamond}^{Prem=1}(t) &= 0, \; \forall t \;\; \implies \dot{a}_{\diamond}^{Prem = 1} 0
+a_{\diamond}^{Prem=1}(t) &= 0, \; \forall t \;\; \implies \dot{a}_{\diamond}^{Prem = 1} 0 \;\; \\ 
+a_{*\dagger}^{Prem=1}(t) &= 0
 \end{aligned}$$
 
+We can now set up the new thieles equations: 
 
+$$\begin{aligned}
+\frac{d}{dt}V_{*}^{+}(t, A^{Prem=1}) &= rV_{*}^{+}(t) - \dot{a}_{*}(t) - \mu_{*\diamond}^{x}(t)[V_{\diamond}^{+}(t)-V_{*}^{+}(t)]
++\mu_{*\dagger}^{x}(t)V_{*}^{+}(t) \\ 
+\frac{d}{dt}V_{\diamond}^{+}(t, A^{Prem=1}) &= rV_{\diamond}(t) 
+- \mu_{*\diamond}^{x}(t)[V_{*}^{+}(t)-V_{\diamond}^{+}(t)] 
++ \mu_{\diamond \dagger}^{x}(t)V_{\diamond}^{+}(t)
+\end{aligned}$$
+And again solve for $V_{*}^{+}(t_{i-1})$ and $V_{\diamond}^{+}(t_{i-1})$: 
+
+$$\begin{aligned}
+V_{*}^{+}(t_{i-1}) &= V_{*}^{+}(t_{i}) - h\left[
+rV_{*}^{+}(t_{i}) -\dot{a}_{*}(t_{i}) - \mu_{*\dagger}^{x}(t_{i})[V_{\diamond}^{+}(t_{i})-V_{*}^{+}(t_{i})]
++ \mu_{*\dagger}^{x}(t)V_{*}(t_{i})
+\right] \\ 
+V_{\diamond}^{+}(t_{i-1}) &= V_{\diamond}^{+}(t_{i}) - h\left[
+rV_{\diamond}^{+}(t_{i}) - \mu_{\diamond *}^{x}(t_{i})[V_{*}^{+}(t_{i})-V_{\diamond}^{+}(t_{i})]
++ \mu_{\diamond \dagger}^{x}(t_{i})V_{\diamond}^{+}(t_{i})
+\right]
+\end{aligned}$$ 
+
+
+
+
+```{r}
+#a.e derivative a_{*}:
+a_dot_prem1 <- function(t){
+  if(t >= 0 && t < T){ return(-1) }
+  if(t >= T){ return(0) }
+}
+
+PV_prem1_act <- PV_prem1_dis <- rep(0,N+1)
+PV_prem1_act[N+1] <- PV_prem1_dis[N+1] <- 0 #follows from contract 
+
+for(i in N:1){
+  PV_prem1_act[i] <- PV_prem1_act[i+1] - h*(r*PV_act[i+1] - a_dot_prem1((i+1)*h)
+                                - mu01(x+(i+1)*h)*(PV_prem1_dis[i+1]-PV_prem1_act[i+1])
+                                + mu02(x+(i+1)*h)*(PV_prem1_act[i+1])
+                                )
+  
+  PV_prem1_dis[i] <- PV_prem1_dis[i+1] - h*(r*PV_prem1_dis[i+1] 
+                                - mu10(x+(i+1)*h)*(PV_prem1_act[i+1]-PV_prem1_dis[i+1])
+                                + mu12(x+(i+1)*h)*PV_prem1_dis[i+1]
+                                )
+}
+PV_prem1_act[1]
+```
+We will now use the equvalence principle, which tells us: 
+$$\begin{aligned}
+\pi V_{*}^{+}(0,A^{Prem=1}) &+ V_{*}^{+}(0) = 0 \\ 
+&\Downarrow \\ 
+\pi &= -\frac{V_{*}(0)}{V_{*}^{+}(0,A^{Prem=1})}
+\end{aligned}$$
+
+This gives us: 
+```{r}
+pi0
+
+yearly_premium <- (-1)*pi0/PV_prem1_act[1]
+yearly_premium
+```
 
 
 
