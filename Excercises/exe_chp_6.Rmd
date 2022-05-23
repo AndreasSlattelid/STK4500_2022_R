@@ -191,7 +191,7 @@ PV_prem1_act <- PV_prem1_dis <- rep(0,N+1)
 PV_prem1_act[N+1] <- PV_prem1_dis[N+1] <- 0 #follows from contract 
 
 for(i in N:1){
-  PV_prem1_act[i] <- PV_prem1_act[i+1] - h*(r*PV_act[i+1] - a_dot_prem1((i+1)*h)
+  PV_prem1_act[i] <- PV_prem1_act[i+1] - h*(r*PV_prem1_act[i+1] - a_dot_prem1((i+1)*h)
                                 - mu01(x+(i+1)*h)*(PV_prem1_dis[i+1]-PV_prem1_act[i+1])
                                 + mu02(x+(i+1)*h)*(PV_prem1_act[i+1])
                                 )
