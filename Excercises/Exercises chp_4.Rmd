@@ -3,10 +3,10 @@ title: "Exerciseses chapter 4"
 author: "Andreas Slåttelid"
 date: "23/2/2022"
 output:
-  html_document:
-    df_print: paged
   pdf_document:
     keep_tex: yes
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -154,6 +154,111 @@ V_30_dis <- (1/v(30))*D*s3
 V_30_dis
 
 ```
+\newpage 
+
+## Exercise 4.4 Term insurance in discrete time
+In this exercise we are dealing with a term insurance in discrete time, hence: $S = \{*,\dagger\}$, the contractual information provided: 
+```{r}
+x <- 50
+T <- 10 
+B <- 200000
+r <- 0.025
+```
+
+We are asked to use the equivalence principle to determine the fair premium $\pi$, we start of by describing the policy functions:
+
+$$\begin{aligned}
+a_{*}^{Pre}(n) &= \begin{cases}
+- \pi  & ,n = 0, \dots, T-1 \\
+0 &,else
+\end{cases} \\ 
+a_{*\dagger}^{Post}(n) &= \begin{cases}
+B  & ,n = 0, \dots, T-1 \\
+0 &,else
+\end{cases}
+\end{aligned}$$
+
+Furthermore the formula for dircrete reserves are given by: 
+$$\begin{aligned}
+V_{i}^{+}(t,A) &= 
+\sum_{j}\sum_{n\geq t}\frac{v(n)}{v(t)}p_{ij}^{x}(t,n)a_{j}^{Pre}(n) 
++ \sum_{k \neq j}\sum_{n\geq t}\frac{v(n+1)}{v(t)}p_{ij}^{x}(t,n)p_{jk}^{x}(n,n+1)a_{jk}^{Post}(n)
+\end{aligned}$$
+
+In our case, this translates to: 
+$$\begin{aligned}
+V_{*}^{+}(t,A) &= 
+-\pi\sum_{n=t}^{T-1}\frac{v(n)}{v(t)}p_{**}^{x}(t,n) 
++ B\sum_{n=t}^{T-1}\frac{v(n+1)}{v(t)}p_{**}^{x}(t,n)p_{*\dagger}^{x}(n,n+1)
+\end{aligned}$$
+
+The equivalence principle states that we should choose $\pi$ so that 
+$V_{*}^{+}(0,A) = 0$, giving us: 
+
+$$\begin{aligned}
+0 &= -\pi\sum_{n=0}^{T-1}v(n)p_{**}^{x}(0,n) 
++ B\sum_{n=0}^{T-1}v(n+1)p_{**}^{x}(0,n)p_{*\dagger}^{x}(n,n+1) \\ 
+&\Downarrow \\ 
+\pi &= \frac{
+B\sum_{n=0}^{T-1}v(n+1)p_{**}^{x}(0,n)p_{*\dagger}^{x}(n,n+1)
+}
+{
+\sum_{n=0}^{T-1}v(n)p_{**}^{x}(0,n)
+}
+\end{aligned}$$
+
+\newpage
+```{r}
+#0: alive, 1:dead 
+mu01 <- function(u){
+  a <- 0.002 
+  b <- 0.0005 
+  return(a + b*(u-50))
+}
+
+p_surv <- function(t,s){
+  f <- mu01
+  integral <- integrate(f, lower = t, upper = s)$value
+  return(exp((-1)*integral))
+}
+```
+
+```{r}
+#discount-factor
+v <- function(t){
+  return(exp(-r*t))
+}
+
+s1_above <- 0 
+for (n in 0:(T-1)){
+  s1_above <- s1_above + v(n+1)*p_surv(x, x+n)*(1-p_surv(x+n,x+n+1))
+}
+
+s2_below <- 0 
+for (n in 0:(T-1)){
+  s2_below <- s2_below + v(n)*p_surv(x,x+n)
+}
+
+above1 <- B*s1_above 
+below2 <- s2_below 
+
+prem <- above1/below2
+prem
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \newpage
 ## Exercise 4.5 Permanent disability insurance discrete time
@@ -254,20 +359,6 @@ p_13 <- function(t,s){
   return(1-exp((-1)*m13*(s-t)))
 }
 ```
-
-
-
-
-\newpage
-s
-
-
-
-
-
-
-
-
 
 
 \newpage 
