@@ -105,7 +105,7 @@ b + \frac{\gamma \sigma}{a} - \frac{\sigma^{2}}{2a^{2}}
 \right)[A(h)-h] - \frac{\sigma^{2}}{4a}A(h)^{2}
 \end{aligned}$$
 
-Now by the equivalence principle we have, that the fair premium $\pi$ is given by: 
+Now from the equivalence principle, we get that the fair premium $\pi$ is given by:
 $$
 0 = V_{*}^{+}(0,A) = \mathbb{E}_{Q}[V_{*}^{+}(0,r_{0})]
 $$
