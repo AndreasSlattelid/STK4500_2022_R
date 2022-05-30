@@ -219,4 +219,93 @@ yearly_premium
 ```
 
 
+## Exercise 6.4 
+We are dealing with an endownment insurance, meaning that $S = \{*,\dagger\}$, we are asked to calculate the second moment of the benefit payments $V_{t}^{+}$ for $t = 10, \dots, 20$. 
+The contractual information provided is: 
+```{r}
+x <- 40 
+T <- 20 
+E <- 115000
+B <- 220000
+r <- 0.03 
+```
+
+
+We start by writing up the policy functions: 
+$$\begin{aligned}
+a_{*}^{Pre}(n) &= \begin{cases}
+0  & ,n = 0, \dots, T-1 \\
+E &,else
+\end{cases} \;\; 
+a_{*\dagger}^{Post}(n) &= \begin{cases}
+B  & ,n = 0, \dots, T-1 \\
+0 &,else
+\end{cases}
+\end{aligned}$$
+
+
+From chapter.5 we are given the following formula: 
+$$\begin{aligned}
+\mathbb{E}[(V_{t}^{+})^{p}|X_{t}=i]
+&= 
+(v_{t})^{p}\sum_{j}p_{ij}^{x}(t,t+1)\sum_{k=0}^{p}{p \choose k}(a_{ij}^{Post}(t))^{p-k}\mathbb{E}[(V_{t+1}^{+})^{k}|X_{t+1}=j]
+\end{aligned}$$
+
+Where $v_{t}$ is the one-step discount factor in $[t,t+1]$ i.e:
+$$
+v(t) = v_{0}v_{1}\dots v_{t-1}
+$$
+
+Let's denote $V_{2}(t) := \mathbb{E}[(V_{t}^{+})^{2}|X_{t}=*]$, and then translate the equation above into our situation: 
+
+$$\begin{aligned}
+V_{2}(t) &= (v_{t})^{2}\sum_{j}p_{*j}^{x}(t,t+1)\sum_{k=0}^{2}{2 \choose k}(a_{*j}^{Post}(t))^{2-k}\mathbb{E}[(V_{t+1}^{+})^{k}|X_{t+1}=j] \\ 
+&= (v_{t})^{2}p_{**}^{x}(t,t+1)\mathbb{E}[(V_{t+1}^{+})^{2}|X_{t+1}=*] 
++ (v_{t})^{2}p_{*\dagger}^{x}(t,t+1)(a_{*\dagger}^{Post}(t))^{2} \\ 
+&= (v_{t})^{2}p_{**}^{x}(t,t+1)V_{2}(t+1)
++ (v_{t})^{2}p_{*\dagger}^{x}(t,t+1)(a_{*\dagger}^{Post}(t))^{2} \\ 
+&= e^{-2r}[p_{**}^{x}(t,t+1)V_{2}(t+1) + p_{*\dagger}^{x}(t,t+1)(a_{*\dagger}^{Post}(t))^{2}]
+\end{aligned}$$
+
+This has now become an difference equation, with final condition: 
+$$
+V_{2}(T) = (\Delta a_{*}^{Pre}(T))^{2} = E^{2}
+$$
+\newpage 
+From the exercise it's also given that: 
+
+$$
+\mu_{*\dagger}^{x}(t) = 0.0018 + 0.0004t
+$$
+```{r}
+#0:alive, 1:dead
+
+mu01_x <- function(t){
+  return(0.0018 + 0.0004*t)
+}
+
+p_surv_x <- function(t,s){
+  f <- mu01_x
+  integral <- integrate(f, lower = t, upper = s)$value
+  return(exp((-1)*integral))
+}
+
+```
+
+
+
+```{r}
+V2 <- rep(0,T+1) 
+V2[T+1] <- E^{2}
+
+for(n in (T-1):0){
+  V2[n+1] <- exp(-2*r)*(p_surv_x(n,n+1)*V2[n+2] + B^{2}*(1-p_surv_x(n,n+1)))
+}
+V2
+```
+
+
+
+
+
 
