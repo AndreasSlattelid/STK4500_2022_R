@@ -90,7 +90,7 @@ Euler <- function(t0,P0,h,tn){
 
 t0 <- 30       #start age
 P0 <- diag(4)  #initial start with P(s,s) = I
-tn <- 75      #end age
+tn <- 110      #end age
 h <- 1/12      #step size 
 N <- (tn-t0)/h #number of steps
 
