@@ -79,7 +79,7 @@ Euler <- function(t0,P0,h,tn){
   #Initial condition at s
   P <- array(diag(D*(N+1)), dim=c(D,D,N+1))
   #First iteration
-  P[,,1] <- P0
+  P[,,1] <- P0 + h*field(t0,P0)
   
   
   for(n in 1:N){
@@ -96,7 +96,7 @@ N <- (tn-t0)/h #number of steps
 
 sol <- Euler(t0,P0,h,tn) #contains ages transition probs from 30 to 110
 #p_surv(30,75): 
-sol[1,1, ][12*35 +1]
+sol[1,1, ][12*35]
 
 ``` 
 \newpage
@@ -125,8 +125,6 @@ fig
 
 
 \newpage
-
-
 
 ## Exercise 6.2 
 
