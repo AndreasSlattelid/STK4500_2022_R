@@ -16,6 +16,117 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ``` 
 
+## Exercise 6.1 
+In this exercise we are asked to calculate transition rates using an Euler scheme, we have four states, i.e $S = \{*, \diamond, \times, \dagger\}$, where $\times$ represents critically ill. 
+From the text, we have the following transition rate matrix:
+```{r, message=FALSE}
+#required libraries: 
+library(tidyverse)
+library(scales)
+```
+
+
+```{r}
+#0: alive, 1: disabeld, 2: critcally ill, 3: dead 
+lambda <- function(t){
+  
+  #constants given in exercise:
+  a1 <- 4*10**(-4)
+  b1 <- 3.4674*10**(-6)
+  c1 <- 0.138155 
+  a2 <- 5*10**(-4)
+  b2 <- 7.5858*10**(-5)
+  c2 <- 0.08749
+  
+  #alive
+  m01 <- a1 + b1*exp(c1*t)
+  m02 <- 0.05*m01 
+  m03 <- a2 + b2*exp(c2*t)
+  m00 <- -(m01 + m02 + m03)
+  
+  #disabeld
+  m10 <- 0.1*m01 
+  m12 <- m02 
+  m13 <- m03 
+  m11 <- -(m10 + m12 + m13)
+  
+  #critically ill
+  m23 <- 1.2*m13
+  m21 <- 0 
+  m20 <- 0 
+  m22 <- -(m23 + m21 +m20)
+
+  m30 <- m31 <- m32 <- m33 <- 0
+  trans_rates <- c(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21,m22,m23, m30, m31,m32,m33)
+  
+  L <- matrix(trans_rates, nrow=4, byrow=TRUE)
+  
+  return(L)
+}
+```
+
+```{r, message = FALSE}
+field <- function(t,M){
+  return(M%*%lambda(t))
+}
+
+#field(t0, P0)
+
+Euler <- function(t0,P0,h,tn){
+  if(t0==tn){ return(P0)}
+  N <- (tn-t0)/h
+  D <- dim(P0)[1] #gives dimension of mxn matrix dim = c(m,n)
+  #Initial condition at s
+  P <- array(diag(D*(N+1)), dim=c(D,D,N+1))
+  #First iteration
+  P[,,1] <- P0
+  
+  
+  for(n in 1:N){
+    P[,,n+1] <- P[,,n]+h*field(t0+n*h,P[,,n])
+  }
+  return(P) #returns array, array(data , dim= c(3,3,2)), this stores 2 3x3 matricies
+}
+
+t0 <- 30       #start age
+P0 <- diag(4)  #initial start with P(s,s) = I
+tn <- 75      #end age
+h <- 1/12      #step size 
+N <- (tn-t0)/h #number of steps
+
+sol <- Euler(t0,P0,h,tn) #contains ages transition probs from 30 to 110
+#p_surv(30,75): 
+sol[1,1, ][12*35 +1]
+
+``` 
+\newpage
+```{r}
+a <- seq(30, 110, length = length(sol[1,1, ]))
+b <- sol[1,1, ]
+
+
+df <- data.frame(a,b)
+colnames(df) <- c("age", "survival_prob")
+
+fig <- df %>% 
+  ggplot(aes(x = age, y = survival_prob)) + 
+  geom_line() + 
+  scale_y_continuous() + 
+  xlab("Age") + 
+  ylab("Survival probability") 
+
+fig
+```
+
+
+
+
+
+
+
+\newpage
+
+
 
 ## Exercise 6.2 
 
