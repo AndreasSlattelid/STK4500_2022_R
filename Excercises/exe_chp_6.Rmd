@@ -413,6 +413,115 @@ for(n in (T-1):0){
 V2
 ```
 
+\newpage 
+
+## Exercise 6.5 
+We are considering a permanent disability insurance, so $S = \{*, \diamond, \dagger \}$, with $\mu_{\diamond *}(t) = 0$. Contractual information: 
+```{r}
+x <- 60 
+T <- 10 
+D <- 30000
+B <- 50000 
+r <- 0.05
+u <- 60000
+```
+
+We are asked to find: 
+$$
+P_{\diamond}(t,u) := P[V_{t}^{+} < u|X_{t}=\diamond]
+$$
+for $t=7$ and $u=\$60k$
+
+Before we start, we write up the desired policy functions: 
+
+$$\begin{aligned}
+a_{\diamond}^{Pre}(n) &= \begin{cases}
+D  & ,n = 0, \dots, T-1 \\
+0 &,else
+\end{cases} \;\; 
+a_{*\dagger}^{Post}(n) &= \begin{cases}
+B  & ,n = 0, \dots, T-1 \\
+0 &,else
+\end{cases} \;\; 
+a_{\diamond\dagger}^{Post}(n) &= \begin{cases}
+B  & ,n = 0, \dots, T-1 \\
+0 &,else
+\end{cases}
+\end{aligned}$$ 
+
+We will use Thiele's difference equation for distributions of mathematical reserves: 
+
+$$\begin{aligned}
+P_{i}(t,u) &= \sum_{k} p_{ik}^{x}(t,t+1)P_{k}(t+1, v_{t}^{-1}[
+u - a_{i}^{Pre}(t)-a_{ik}^{Post}(t)
+])
+\end{aligned}$$
+
+Translating this into our situation: 
+$$\begin{aligned}
+P_{\diamond}(t,u) &= p_{\diamond \diamond}^{x}(t,t+1)P_{\diamond}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \diamond}^{Post}(t)
+]) \\ 
+&+ p_{\diamond \dagger}^{x}(t,t+1)P_{\dagger}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \dagger}^{Post}(t)
+]) \\ 
+&= 
+p_{\diamond \diamond}^{x}(t,t+1)P_{\diamond}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)
+]) \\ 
+&+ p_{\diamond \dagger}^{x}(t,t+1)P_{\dagger}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \dagger}^{Post}(t)
+])
+\end{aligned}$$
+
+
+We start by exploring $P_{\dagger}$: 
+$$\begin{aligned}
+P_{\dagger}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \dagger}^{Post}(t)
+]) &= 
+P[V_{t+1}^{+} < e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \dagger}^{Post}(t)
+]|X_{t+1} = \dagger] \\ 
+&= 
+P[0 < e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \dagger}^{Post}(t)
+]] \\ 
+&= \begin{cases}
+1 &, t>T \\ 
+0 &, t\leq T
+\end{cases}
+\end{aligned}$$
+Since we are interested in $t\leq T$, we get: 
+$$
+P_{\dagger}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)- a_{\diamond \dagger}^{Post}(t)
+] = 0
+$$
+Giving us: 
+$$\begin{aligned}
+P_{\diamond}(t,u) &= p_{\diamond \diamond}^{x}(t,t+1)P_{\diamond}(t+1,e^{r}[
+u - a_{\diamond}^{Pre}(t)
+])
+\end{aligned}$$
+
+We iterate backwards, given that we know $V_{10}^{+} = 0$, as we do not need to set aside money for someone entering the contract at the end. 
+$$\begin{aligned}
+P_{\diamond}(9,60) &= p_{\diamond \diamond}^{x}(9,10)P_{\diamond}(10,e^{r}[
+60 - a_{\diamond}^{Pre}(9)
+]) \\ 
+&= p_{\diamond \diamond}^{x}(9,10)P[0 < e^{r}[
+60 - 30] \\ 
+&= p_{\diamond \diamond}^{x}(9,10)
+\end{aligned}$$
+
+
+
+
+
+
+
+
 
 
 
