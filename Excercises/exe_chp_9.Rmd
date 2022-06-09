@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ``` 
 
 
-## Exercise 9.2
+## Exercise 9.3 Markov property of B&S
 
 ### i)
 We are asked to show that the solution to the GBM under $Q$ is given by: 
@@ -113,7 +113,7 @@ $$\begin{aligned}
 
 \newpage 
 
-## Exercise 9.3 
+## Exercise 9.4 
 
 We are dealing with an endownment insurance, hence $S = \{*,\dagger\}$, the contractual information provided is: 
 ```{r}
@@ -205,7 +205,7 @@ V_reserve <- function(t, T,St){
 V_reserve(t = 0, T = 10, St = 1)
 ```
 
-## Exercise 9.4 
+## Exercise 9.5 
 In this exercise we are asked to see what happens to the reserve at time $t=6$, if: 
 
 i) Fund increases by 45% 
@@ -225,7 +225,7 @@ V_reserve(t = 6, T = 10, St = 1.05)
 
 
 \newpage 
-## Exercise 9.5 
+## Exercise 9.6 B&S PDE 
 We are considering a call option: $X = (S_{T}-K)^{+}$, furthermore the stock price follows a GBM: 
 $$
 dS_{t} = \mu S_{t}dt + \sigma S_{t}dW_{t}\;\;(P)
