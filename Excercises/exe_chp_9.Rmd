@@ -16,7 +16,70 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ``` 
 
+## Exercise 9.1 Unit-linked term insurance
+We are dealing with a term insurance, so $S = \{*,\dagger\}$, the contractual information provided is: 
+```{r}
+x <- 55 
+T <- 10 
+r <- 0.05 
 
+#GBM parameters: 
+sigma <- 0.25 
+S0 <- 1
+
+#management: 
+beta <- 0.006
+```
+
+From the text, we get the following payout in case of death: 
+$$
+C(t) = (1-0.04)\pi_{0}\frac{S_{t}}{S_{0}}e^{-\beta t}1.10
+$$
+$$\begin{aligned}
+a_{*\dagger}(t) =
+\begin{cases}
+C(t), &t\in[0,T) \\ 
+0, &else
+\end{cases}
+\end{aligned}$$
+
+We recall the formula for continous reserves: 
+$$\begin{aligned}
+V_{i}^{+}(t,A) &= 
+\sum_{j}\frac{v(T)}{v(t)}p_{ij}^{x}(t,T)\Delta a_{j}(T) 
++ \sum_{j}\int_{t}^{T}\frac{v(s)}{v(t)}p_{ij}^{x}(t,s)da_{j}(s) 
++ \sum_{k\neq j}\int_{t}^{T}\frac{v(s)}{v(t)}p_{ij}^{x}(t,s)\mu_{jk}^{x}(s)a_{jk}(s)ds
+\end{aligned}$$
+
+only the last part will be relevant, furthermore $V_{i}^{+}(t,S_{t}) = \mathbb{E}_{Q}[V_{i}^{+}(t,A)|\mathcal{F}_{t}]$, translating this into our situation: 
+
+$$\begin{aligned}
+V_{*}^{+}(t,S_{t}) &= \int_{t}^{T}p_{**}^{x}(t,s)\mu_{jk}^{x}(s)
+\mathbb{E}_{Q}\left[
+\frac{v(s)}{v(t)}C(s)\bigg{|}\mathcal{F}_{t}
+\right]ds
+\end{aligned}$$
+
+Idea here is to use martingale theory, furthermore, let $C(s) = N(s)S_{s}$, where $N(s)$ represents the collection of deterministic terms in $C(s)$. This gives: 
+$$\begin{aligned}
+\mathbb{E}_{Q}\left[
+\frac{v(s)}{v(t)}C(s)\bigg{|}\mathcal{F}_{t}
+\right] &= 
+N(s)\mathbb{E}_{Q}\left[
+\frac{v(s)}{v(t)}S_{s}\bigg{|}\mathcal{F}_{t}
+\right] = 
+N(s)\frac{1}{v(t)}\mathbb{E}_{Q}[v(s)S_{s}|\mathcal{F}_{t}] = N(s)S_{t} 
+\end{aligned}$$
+We were asked to calculate $V_{*}^{+}(0,S_{0})$: 
+
+$$\begin{aligned}
+V_{*}^{+}(0,S_{0}) &= \int_{0}^{T}p_{**}^{x}(0,s)\mu_{*\dagger}^{x}(s)N(s)v(0)S_{0}ds \\ 
+&= \int_{0}^{T}p_{**}^{x}(0,s)\mu_{*\dagger}^{x}(s)(1-0.04)\pi_{0}e^{-\beta s}1.10ds \\ 
+&= (1-0.04)\pi_{0}1.10\int_{0}^{T}p_{**}^{x}(0,s)\mu_{*\dagger}^{x}(s)e^{-\beta s}ds
+\end{aligned}$$
+
+
+\newpage
 ## Exercise 9.3 Markov property of B&S
 
 ### i)
