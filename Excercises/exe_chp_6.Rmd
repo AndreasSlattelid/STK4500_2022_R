@@ -515,8 +515,8 @@ $$\begin{aligned}
 P_{\diamond}(9,60) &= p_{\diamond \diamond}^{x}(9,10)P_{\diamond}(10,e^{r}[
 60 - a_{\diamond}^{Pre}(9)
 ]) \\ 
-&= p_{\diamond \diamond}^{x}(9,10)P[0 < e^{r}[
-60 - 30] \\ 
+&= p_{\diamond \diamond}^{x}(9,10)P(0 < e^{r}[
+60 - 30]) \\ 
 &= p_{\diamond \diamond}^{x}(9,10)
 \end{aligned}$$
 
