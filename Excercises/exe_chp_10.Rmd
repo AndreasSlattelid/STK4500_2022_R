@@ -22,13 +22,14 @@ In this exercise we are dealing with a term-insurance, meaning that $S = \{*,\da
 ```{r}
 T  <- 10 
 x0 <- 50 
-B  <- 200000
+Benefit  <- 200000 #need B as function in ATS-form of Vasicek
 
 #Vasicek parameters:
 a     <- 5 
 b     <- 0.04 
 sigma <- 0.01 
 r0    <- 0.02
+gamma <- 0
 
 #0:alive, 1: dead 
 mu01 <- 0.009
@@ -118,6 +119,60 @@ $$\begin{aligned}
 \int_{0}^{T}P(0,s)p_{**}^{x}(0,s)ds
 }
 \end{aligned}$$
+
+\newpage
+
+We have been given the following: 
+$$
+\mu_{*\dagger}(t) = 0.009
+$$
+```{r}
+#0:alive, 1:dead
+mu01 <- function(u){
+  return(0.009)
+}
+
+p_surv <- function(t,s){
+  f <- Vectorize(mu01)
+  integral <- integrate(f, lower = t, upper = s)$value
+  return(exp((-1)*integral))
+}
+
+```
+
+
+
+```{r}
+A <- function(h){
+  return((1-exp(a*h))/h)
+}
+
+B <- function(h){
+  res <- (b + gamma*sigma/a - (sigma**2)/(2*a**2))*(A((h))-(h)) -
+         ((sigma**2)/(4*a))*A((h))**2
+  return(res)
+}
+
+P <- function(u){
+  ans <- exp((-1)*A(u)*r0 + B(u))
+  return(ans)
+}
+
+above <- function(u){
+  return(p_surv(0,u)*P(u)*mu01(u))
+}
+
+below <- function(u){
+  return(p_surv(0,u)*P(u))
+}
+
+upper <- Benefit*integrate(Vectorize(above), 0, T)$value
+lower <- integrate(Vectorize(below), 0, T)$value
+
+yearly_premium <- upper/lower
+yearly_premium
+
+```
 
 
 
