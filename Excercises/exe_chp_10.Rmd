@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Exercise 10.1 
-In this exercise we are dealing with a term-insurance, meaning that $S = \{*,\dagger\}$, we have stochastic interest rates, which follows a Vasicke model, furthermore, the risk-premium is given by $\gamma = 0$, meaning that we will have the same model under $P$ as under $Q$, the contractual information provided is: 
+In this exercise we are dealing with a term-insurance, meaning that $S = \{*,\dagger\}$, we have stochastic interest rates, which follows a Vasicek model, furthermore, the risk-premium is given by $\gamma = 0$, meaning that we will have the same model under $P$ as under $Q$, the contractual information provided is: 
 ```{r}
 T  <- 10 
 x0 <- 50 
@@ -30,21 +30,7 @@ b     <- 0.04
 sigma <- 0.01 
 r0    <- 0.02
 gamma <- 0
-
-#0:alive, 1: dead 
-mu01 <- 0.009
-
-p_surv <- function(t,s){
-  f <- mu01
-  integral <- integrate(f, lower = t, upper = s)$value
-  return(exp((-1)*integral))
-}
 ```
-We clarify, what the survival-probability is: 
-$$\begin{aligned}
-p(t,s) &= \exp\left(-\int_{t}^{s}\mu_{*\dagger}(u)du\right) \\ 
-&= \exp(-0.009[s-t])
-\end{aligned}$$
 
 The desired Vasicek model is in this case given by: 
 $$
@@ -121,6 +107,11 @@ $$\begin{aligned}
 \end{aligned}$$
 
 \newpage
+We clarify, what the survival-probability is: 
+$$\begin{aligned}
+p(t,s) &= \exp\left(-\int_{t}^{s}\mu_{*\dagger}(u)du\right) \\ 
+&= \exp(-0.009[s-t])
+\end{aligned}$$
 
 We have been given the following: 
 $$
