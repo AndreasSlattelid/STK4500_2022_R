@@ -5,6 +5,7 @@ date: "23/2/2022"
 output:
   pdf_document:
     keep_tex: yes
+    toc: true
   html_document:
     df_print: paged
 editor_options: 
@@ -15,6 +16,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+\newpage 
 
 ## Exercise 4.2 + 4.3
 
@@ -273,7 +275,7 @@ v <- function(t){
 }
 ```
 
-## i)
+## Exercise 4.5 i)
 
 In this case we have the following transition rates: $$\begin{aligned}
 \mu_{*\diamond}(t) = 0.0279 \;\; \mu_{*\dagger}(t) = 0.0229 \;\; \mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t) 
@@ -361,7 +363,7 @@ p_13 <- function(t,s){
 
 \newpage
 
-## Exercise 4.6
+## Exercise 4.6 (Endowment policy in discrete time)
 
 Required-libraries
 
