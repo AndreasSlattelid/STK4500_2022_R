@@ -676,11 +676,13 @@ summand_lower <- function(n){
   v(n)*p_surv(x, x +n)
 }
 
+#map_dbl: maps the function summand_upper to the elements 0:(T-1)
 sum_upper <- sum(map_dbl(0:(T-1), summand_upper))
 sum_lower <- sum(map_dbl(0:(T-1), summand_lower))
 
 above_discrete <- v(T)*p_surv(x, x + T)*E + B*sum_upper
 below_discrete <- sum_lower
+
 premium_discrete <- above_discrete/below_discrete
 premium_discrete
 ```
