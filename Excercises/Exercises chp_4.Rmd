@@ -554,7 +554,7 @@ We start with discrete time, the policy functions are as follows:
 $$\begin{aligned}
 a_{*}^{Pre}(n) &= \begin{cases}
 - \pi  & ,n = 0, \dots, T-1 \\
-E &,else
+E &, n = T
 \end{cases} \\ 
 a_{*\dagger}^{Post}(n) &= \begin{cases}
 B  & ,n = 0, \dots, T-1 \\
@@ -712,6 +712,10 @@ premium_cont
 ```
 
 We then recall what the premiums were in the different cases:
+
+
+
+We then recall what the premiums were:
 
 ```{r}
 premium_discrete
