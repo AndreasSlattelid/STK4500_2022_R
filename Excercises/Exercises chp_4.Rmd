@@ -7,6 +7,9 @@ output:
     keep_tex: yes
   html_document:
     df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Exercise 4.2 + 4.3
 
-In this exercise we are considering a disability insurance, hence $S = \{*,\diamond ,\dagger \}$. The contractual information given are: as follows: 
+In this exercise we are considering a disability insurance, hence
+$S = \{*,\diamond ,\dagger \}$. The contractual information given are:
+as follows:
 
 ```{r}
 x <- 30     #age
@@ -25,7 +30,8 @@ r <- 0.03   #intereset rate
 premium_yearly <- 2500
 ```
 
-Furthermore the transition rates are given by: 
+Furthermore the transition rates are given by:
+
 ```{r}
 lambda <- function(t){
   #we do not have any t-dependency
@@ -42,8 +48,7 @@ lambda <- function(t){
 }
 ```
 
-We also have the following policy-functions: 
-$$\begin{aligned}
+We also have the following policy-functions: $$\begin{aligned}
 a_{*}(t) &= \begin{cases}
 0, &t<0 \\
 -\pi t, &t\in[0,T) \\ 
@@ -56,10 +61,8 @@ DT, &t\geq T
 \end{cases} 
 \end{aligned}$$
 
-
-We were asked to calculate $V_{j}^{+}(t,A)$ for $j = *, \diamond$ and for $t=30$.
-We then get: 
-$$\begin{aligned}
+We were asked to calculate $V_{j}^{+}(t,A)$ for $j = *, \diamond$ and
+for $t=30$. We then get: $$\begin{aligned}
 V_{*}^{+}(t,A) &= \frac{1}{v(t)}\left[\int_{t}^{T}v(s)p_{**}(x+t,x+s)da_{*}(s)   
 + \int_{t}^{T}v(s)p_{*\diamond}(x+t,x+s)da_{\diamond}(s) 
 \right] \\ 
@@ -68,7 +71,7 @@ V_{*}^{+}(t,A) &= \frac{1}{v(t)}\left[\int_{t}^{T}v(s)p_{**}(x+t,x+s)da_{*}(s)
 \right]
 \end{aligned}$$
 
-\newpage 
+\newpage
 
 $$\begin{aligned}
 V_{\diamond}^{+}(t,A) &= \frac{1}{v(t)}\left[
@@ -77,12 +80,12 @@ V_{\diamond}^{+}(t,A) &= \frac{1}{v(t)}\left[
 &= \frac{1}{v(t)}\left[D
 \int_{t}^{T}v(s)p_{\diamond \diamond}(x+t, x+s)ds
 \right] 
-\end{aligned}$$
-We will now use an Euler-scheme to simulate what's going on, and then use a Riemann-sum to compute the integrals: 
-$$
+\end{aligned}$$ We will now use an Euler-scheme to simulate what's going
+on, and then use a Riemann-sum to compute the integrals: $$
 \int_{a}^{b}f(x)dx \approx \sum_{i=0}^{n-1}f(x_{i}^{*})\Delta x
-$$
-Where $\Delta x = \frac{b-a}{n}$, which in our case corresponds to: $h$ and $x_{i}^{*} \in [x_{i},x_{i+1}]$
+$$ Where $\Delta x = \frac{b-a}{n}$, which in our case corresponds to:
+$h$ and $x_{i}^{*} \in [x_{i},x_{i+1}]$
+
 ```{r}
 field <- function(t,M){
   return(M%*%lambda(t))
@@ -154,10 +157,14 @@ V_30_dis <- (1/v(30))*D*s3
 V_30_dis
 
 ```
-\newpage 
+
+\newpage
 
 ## Exercise 4.4 Term insurance in discrete time
-In this exercise we are dealing with a term insurance in discrete time, hence: $S = \{*,\dagger\}$, the contractual information provided: 
+
+In this exercise we are dealing with a term insurance in discrete time,
+hence: $S = \{*,\dagger\}$, the contractual information provided:
+
 ```{r}
 x <- 50
 T <- 10 
@@ -165,7 +172,8 @@ B <- 200000
 r <- 0.025
 ```
 
-We are asked to use the equivalence principle to determine the fair premium $\pi$, we start of by describing the policy functions:
+We are asked to use the equivalence principle to determine the fair
+premium $\pi$, we start of by describing the policy functions:
 
 $$\begin{aligned}
 a_{*}^{Pre}(n) &= \begin{cases}
@@ -178,22 +186,21 @@ B  & ,n = 0, \dots, T-1 \\
 \end{cases}
 \end{aligned}$$
 
-Furthermore the formula for dircrete reserves are given by: 
+Furthermore the formula for dircrete reserves are given by:
 $$\begin{aligned}
 V_{i}^{+}(t,A) &= 
 \sum_{j}\sum_{n\geq t}\frac{v(n)}{v(t)}p_{ij}^{x}(t,n)a_{j}^{Pre}(n) 
 + \sum_{k \neq j}\sum_{n\geq t}\frac{v(n+1)}{v(t)}p_{ij}^{x}(t,n)p_{jk}^{x}(n,n+1)a_{jk}^{Post}(n)
 \end{aligned}$$
 
-In our case, this translates to: 
-$$\begin{aligned}
+In our case, this translates to: $$\begin{aligned}
 V_{*}^{+}(t,A) &= 
 -\pi\sum_{n=t}^{T-1}\frac{v(n)}{v(t)}p_{**}^{x}(t,n) 
 + B\sum_{n=t}^{T-1}\frac{v(n+1)}{v(t)}p_{**}^{x}(t,n)p_{*\dagger}^{x}(n,n+1)
 \end{aligned}$$
 
-The equivalence principle states that we should choose $\pi$ so that 
-$V_{*}^{+}(0,A) = 0$, giving us: 
+The equivalence principle states that we should choose $\pi$ so that
+$V_{*}^{+}(0,A) = 0$, giving us:
 
 $$\begin{aligned}
 0 &= -\pi\sum_{n=0}^{T-1}v(n)p_{**}^{x}(0,n) 
@@ -208,6 +215,7 @@ B\sum_{n=0}^{T-1}v(n+1)p_{**}^{x}(0,n)p_{*\dagger}^{x}(n,n+1)
 \end{aligned}$$
 
 \newpage
+
 ```{r}
 #0: alive, 1:dead 
 mu01 <- function(u){
@@ -246,23 +254,13 @@ prem <- above1/below2
 prem
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \newpage
+
 ## Exercise 4.5 Permanent disability insurance discrete time
-We have the following state space $S = \{*, \diamond, \dagger\}$. Furthermore the contractual information provided is: 
+
+We have the following state space $S = \{*, \diamond, \dagger\}$.
+Furthermore the contractual information provided is:
+
 ```{r}
 x <- 45 
 T <- 20 
@@ -275,12 +273,12 @@ v <- function(t){
 }
 ```
 
-## i) 
+## i)
 
-In this case we have the following transition rates: 
-$$\begin{aligned}
+In this case we have the following transition rates: $$\begin{aligned}
 \mu_{*\diamond}(t) = 0.0279 \;\; \mu_{*\dagger}(t) = 0.0229 \;\; \mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t) 
 \end{aligned}$$
+
 ```{r}
 #1: alive 
 #2: disabled
@@ -294,17 +292,17 @@ m22 <- -(m21+m23)
 m31 <- m32 <- m33 <- 0
 ```
 
-Since reactivation is not allowed, we can actually solve the transition-probabilites directly. We first start with the survival probability: 
-$$p_{11}(t,s) = \exp((-1)*0.0508(s-t))$$
+Since reactivation is not allowed, we can actually solve the
+transition-probabilites directly. We first start with the survival
+probability: $$p_{11}(t,s) = \exp((-1)*0.0508(s-t))$$
+
 ```{r}
 p_11 <- function(t,s){
   return(exp(-1*0.0508*(s-t)))
 }
 ```
 
-
-We describe the policy functions: 
-$$\begin{aligned}
+We describe the policy functions: $$\begin{aligned}
 a_{*}^{Pre}(n) &= \begin{cases}
 -\pi &, n = 0, \dots, T-1 \\ 
 0&,else
@@ -316,7 +314,7 @@ D &, n = 0, \dots, T-1 \\
 \end{cases}
 \end{aligned}$$
 
-And we get the following formula for the reserve: 
+And we get the following formula for the reserve:
 
 $$\begin{aligned}
 V_{*}^{+}(t,A) &=
@@ -325,27 +323,28 @@ V_{*}^{+}(t,A) &=
 \right]
 \end{aligned}$$
 
-
 \newpage
-Now from the equivalence principle we should have that the premium $\pi$ should be decided so that $V_{*}^{+}(0,A) = 0$, this leaves us with: 
+
+Now from the equivalence principle we should have that the premium $\pi$
+should be decided so that $V_{*}^{+}(0,A) = 0$, this leaves us with:
 
 $$\begin{aligned}
 \pi &= \frac{D\sum_{n=0}^{T-1}v(n)p_{*\diamond}^{x}(0,n)}{\sum_{n=0}^{T-1}v(n)p_{**}^{x}(0,n)}
 \end{aligned}$$
 
-
-We can use Kolmogorov's equations to find $p_{*\dagger}$ and $p_{*\diamond}$, as reactivation is not allowed, and $\mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t)$
+We can use Kolmogorov's equations to find $p_{*\dagger}$ and
+$p_{*\diamond}$, as reactivation is not allowed, and
+$\mu_{\diamond \dagger}(t) = \mu_{*\dagger}(t)$
 
 $$\begin{aligned}
 \partial_{s}p_{13}(t,s) &= p_{11}(t,s)\mu_{13}(s) + p_{12}(t,s)\mu_{23}(s)
-\end{aligned}$$
-Now, lets introduce the notation: $\hat{\mu}(u) = \mu_{23}(u) = \mu_{13}(u)$, we then have:
+\end{aligned}$$ Now, lets introduce the notation:
+$\hat{\mu}(u) = \mu_{23}(u) = \mu_{13}(u)$, we then have:
 $$\begin{aligned}
 \partial_{s}p_{13}(t,s) &= \left[p_{11}(t,s) + p_{12}(t,s)\right]\hat{\mu}(s), \;\;\; (p_{11} + p_{12} + p_{13} = 1) \\ 
 &= \left[1 - p_{13}(t,s)\right]\hat{\mu}(s)
-\end{aligned}$$
-We can now multiply by $(-1)$, and take the derivative of $1$ (which is zero), this gives us: 
-$$\begin{aligned}
+\end{aligned}$$ We can now multiply by $(-1)$, and take the derivative
+of $1$ (which is zero), this gives us: $$\begin{aligned}
 \partial_{s}[1-p_{13}(t,s)] &= (-1)*\left[1 - p_{13}(t,s)\right]\hat{\mu}(s) \\ 
 &\Downarrow \\ 
 p_{13}(t,s) &= 1 - e^{-\int_{t}^{s}\hat{\mu}(u)du} \\ 
@@ -360,10 +359,12 @@ p_13 <- function(t,s){
 }
 ```
 
+\newpage
 
-\newpage 
-## Exercise 4.6 
+## Exercise 4.6
+
 Required-libraries
+
 ```{r, message=FALSE}
 list.of.packages <- c("tidyverse", "scales")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -373,7 +374,9 @@ library(tidyverse)
 library(scales)   #nice formatting of plots
 ```
 
-We are dealing with an endownment policy, in discrete time, this means that $S = \{*, \dagger\}$, the contractual information provided is: 
+We are dealing with an endownment policy, in discrete time, this means
+that $S = \{*, \dagger\}$, the contractual information provided is:
+
 ```{r}
 x <- 35     #age
 T <- 25     #length of contract
@@ -382,7 +385,8 @@ E <- 125000 #endownment
 B <- 250000 #death-benfit
 ```
 
-futhermore the force of mortality is given by: 
+futhermore the force of mortality is given by:
+
 ```{r}
 mu <- function(t){
   return(0.0015 + 0.0004*(t-35))
@@ -390,16 +394,14 @@ mu <- function(t){
 ```
 
 discount-factor:
+
 ```{r}
 v <- function(t){
   return(exp(-r*t))
 }
 ```
 
-
-
-We can also calulate the survival probability: 
-$$\begin{aligned}
+We can also calulate the survival probability: $$\begin{aligned}
 p_{**}(s,t) &= \exp\left(-\int_{s}^{t}\mu_{*\dagger}(u)du\right)
 \end{aligned}$$
 
@@ -411,7 +413,8 @@ p_surv <- function(s,t){
 p_surv(35,36)
 ```
 
-We are asked to calculate the yearly premium $\pi$, but first we start by defining the policy functions specified in the contract.
+We are asked to calculate the yearly premium $\pi$, but first we start
+by defining the policy functions specified in the contract.
 
 $$\begin{aligned}
 a_{*}^{Pre}(n) &= \begin{cases}
@@ -425,7 +428,8 @@ B &, n = 0, \dots, T-1 \\
 \end{cases}
 \end{aligned}$$
 
-We can now start to calculate the reserves, but we must be aware of what happens at $n = T$: 
+We can now start to calculate the reserves, but we must be aware of what
+happens at $n = T$:
 
 $$\begin{aligned}
 V_{*}^{+}(t,A) &= \frac{1}{v(t)}\left[
@@ -435,17 +439,15 @@ V_{*}^{+}(t,A) &= \frac{1}{v(t)}\left[
 &= \frac{1}{v(t)}\left[\alpha + \beta \right]
 \end{aligned}$$
 
-
-Here $\alpha$ corresponds to the first sum, and $\beta$ corresponds to the second sum: 
-$$\begin{aligned}
+Here $\alpha$ corresponds to the first sum, and $\beta$ corresponds to
+the second sum: $$\begin{aligned}
 \alpha &= \sum_{n=t}^{T-1}v(n)p_{**}(x+t, x+n)(-\pi) + v(T)p_{**}(x+t, x+T)E \\ 
 \beta &= \sum_{n=t}^{T-1}v(n+1)p_{**}(x+t, x+n)p_{*\dagger}(x+n, x+n+1)B
 \end{aligned}$$
 
-
-We will now use the equivalence principle, which states that the fair premium
-$\pi$ should be such that $V_{*}(0,A) = 0$, and using this method we end up with: 
-$$\begin{aligned}
+We will now use the equivalence principle, which states that the fair
+premium $\pi$ should be such that $V_{*}(0,A) = 0$, and using this
+method we end up with: $$\begin{aligned}
 \pi &= \frac{v(T)p_{**}(x,x+T)E + B\sum_{n=0}^{T-1}v(n+1)p_{**}(x,x+n)p_{*\dagger}(x+n,x+n+1)}{\sum_{n=0}^{T-1}v(n)p_{**}(x,x+n)}
 \end{aligned}$$
 
@@ -467,8 +469,9 @@ premium_yearly <- above/below
 premium_yearly
 
 ```
-We now also want the prospective reserves: i.e $V_{*}^{+}(t,A)$ for $t = 0, \dots , T$:
 
+We now also want the prospective reserves: i.e $V_{*}^{+}(t,A)$ for
+$t = 0, \dots , T$:
 
 ```{r}
 #Present value of reserve when including premiums. 
@@ -514,7 +517,7 @@ V_reserve_2 <- function(x=35, B=250000, T=25){
 reserve_total <- V_reserve_1() + V_reserve_2()
 reserve_total
 
-``` 
+```
 
 ```{r, echo=FALSE}
 df <- data.frame(seq(0,T,1), reserve_total)
@@ -534,9 +537,11 @@ fig1
 #p1
 ```
 
+## Exercise 4.7 Discrete vs continous time endowment insurance
 
-## Exercise 4.7 Discrete vs continous time endowment insurance 
-In this exercise we are considering an endowment insurance, hence $S = \{*, \dagger\}$, the contractual information provided is: 
+In this exercise we are considering an endowment insurance, hence
+$S = \{*, \dagger\}$, the contractual information provided is:
+
 ```{r}
 x <- 30 
 T <- 35 
@@ -545,7 +550,7 @@ B <- 200000
 r <- 0.035
 ```
 
-We start with discrete time, the policy functions are as follows: 
+We start with discrete time, the policy functions are as follows:
 $$\begin{aligned}
 a_{*}^{Pre}(n) &= \begin{cases}
 - \pi  & ,n = 0, \dots, T-1 \\
@@ -557,23 +562,22 @@ B  & ,n = 0, \dots, T-1 \\
 \end{cases}
 \end{aligned}$$
 
-
-Again:  
+Again:\
 $$\begin{aligned}
 V_{i}^{+}(t,A) &= 
 \sum_{j}\sum_{n\geq t}\frac{v(n)}{v(t)}p_{ij}^{x}(t,n)a_{j}^{Pre}(n) 
 + \sum_{k \neq j}\sum_{n\geq t}\frac{v(n+1)}{v(t)}p_{ij}^{x}(t,n)p_{jk}^{x}(n,n+1)a_{jk}^{Post}(n)
 \end{aligned}$$
 
-Which translates to: 
-$$\begin{aligned}
+Which translates to: $$\begin{aligned}
 V_{*}^{+}(t,A) &= 
 -\pi\sum_{n=t}^{T-1}\frac{v(n)}{v(t)}p_{**}^{x}(t,n)
 +\frac{v(T)}{v(t)}p_{**}^{x}(t,T)E
 + B\sum_{n=t}^{T-1}\frac{v(n+1)}{v(t)}p_{**}^{x}(t,n)p_{*\dagger}^{x}(n,n+1)
 \end{aligned}$$
 
-We then use the equivalence principle, telling us that the fair premium $\pi$ should be chosen so that $V_{*}^{+}(0,A) = 0$: 
+We then use the equivalence principle, telling us that the fair premium
+$\pi$ should be chosen so that $V_{*}^{+}(0,A) = 0$:
 
 $$\begin{aligned}
 \pi &= 
@@ -585,7 +589,8 @@ v(T)p_{**}^{x}(0,T)E + B\sum_{n=0}^{T-1}v(n+1)p_{**}^{x}(0,n)p_{*\dagger}^{x}(n,
 }
 \end{aligned}$$
 
-We now discuss the situation in continous time, we then get the following policy functions: 
+We now discuss the situation in continous time, we then get the
+following policy functions:
 
 $$\begin{aligned}
 a_{*}(t) &= \begin{cases}
@@ -599,16 +604,15 @@ B, &t\in[0,T) \\
 \end{cases} 
 \end{aligned}$$
 
-
-We start off by stating the general formula for reserves in continous-time: 
-$$\begin{aligned}
+We start off by stating the general formula for reserves in
+continous-time: $$\begin{aligned}
 V_{i}^{+}(t,A) &= 
 \sum_{j}\frac{v(T)}{v(t)}p_{ij}^{x}(t,T)\Delta a_{j}(T) 
 + \sum_{j}\int_{t}^{T}\frac{v(s)}{v(t)}p_{ij}^{x}(t,s)da_{j}(s) 
 + \sum_{k\neq j}\int_{t}^{T}\frac{v(s)}{v(t)}p_{ij}^{x}(t,s)\mu_{jk}^{x}(s)a_{jk}(s)ds
 \end{aligned}$$
 
-Translating this into our situation: 
+Translating this into our situation:
 
 $$\begin{aligned}
 V_{*}^{+}(t,A) &= 
@@ -616,9 +620,8 @@ V_{*}^{+}(t,A) &=
 + B\int_{t}^{T}\frac{v(s)}{v(t)}p_{**}^{x}(t,s)\mu_{*\dagger}^{x}(s)ds
 \end{aligned}$$
 
-
-Now as always, the equivalence principle tells us to chose $\pi$ such that $V_{*}^{+}(0,A) = 0$: 
-$$\begin{aligned}
+Now as always, the equivalence principle tells us to chose $\pi$ such
+that $V_{*}^{+}(0,A) = 0$: $$\begin{aligned}
 \pi &= 
 \frac{
 v(T)p_{**}^{x}(0,T)E + B\int_{0}^{T}v(s)p_{**}^{x}(0,s)\mu_{*\dagger}^{x}(s)ds
@@ -626,12 +629,91 @@ v(T)p_{**}^{x}(0,T)E + B\int_{0}^{T}v(s)p_{**}^{x}(0,s)\mu_{*\dagger}^{x}(s)ds
 {
 \int_{0}^{T}v(s)p_{**}^{x}(0,s)ds
 }
-\end{aligned}$$
+\end{aligned}$$ \newpage
+
+```{r, message=FALSE}
+#want the map function from purrr:
+library(tidyverse)
+packageVersion("tidyverse")
+```
+
+```{r}
+#0: alive, 1:dead
+mu01 <- function(t){
+  a2 <- 5*10^{-4}
+  b2 <- 7.5858*10^{-5}
+  c2 <- 0.087498 
+  
+  ans <- a2 + b2*exp(c2*t)
+  return(ans)
+}
+```
+
+```{r}
+p_surv <- function(t, s){
+  f <- Vectorize(mu01)
+  integral <- integrate(f, lower = t, upper = s)$value 
+  
+  ans <- exp(-integral)
+  return(ans)
+}
+```
+
+```{r}
+#discount factor
+v <- function(t){
+  return(exp(-r*t))
+}
+```
+
+```{r}
+#premium discrete time:
+summand_upper <- function(n){
+  v(n+1)*p_surv(x, x + n)*(1- p_surv(x + n, x + n +1))
+}
+
+summand_lower <- function(n){
+  v(n)*p_surv(x, x +n)
+}
+
+sum_upper <- sum(map_dbl(0:(T-1), summand_upper))
+sum_lower <- sum(map_dbl(0:(T-1), summand_lower))
+
+above_discrete <- v(T)*p_surv(x, x + T)*E + B*sum_upper
+below_discrete <- sum_lower
+premium_discrete <- above_discrete/below_discrete
+premium_discrete
+```
+
+\newpage
+
+```{r}
+#premium continous time
+integrand_upper <- function(s){
+  v(s)*p_surv(x, x + s)*mu01(x + s)
+}
+
+integrand_lower <- function(s){
+  v(s)*p_surv(x, x + s)
+}
 
 
+f1 <- Vectorize(integrand_upper)
+f2 <- Vectorize(integrand_lower)
 
+integral_upper <- integrate(f1, lower = 0, upper = T)$value
+integral_lower <- integrate(f2, lower = 0, upper = T)$value
 
+above_cont <- v(T)*p_surv(x, x + T)*E + B*integral_upper
+below_cont <- integral_lower
 
+premium_cont <- above_cont/below_cont
+premium_cont
+```
 
+We then recall what the premiums were in the different cases:
 
-
+```{r}
+premium_discrete
+premium_cont
+```
