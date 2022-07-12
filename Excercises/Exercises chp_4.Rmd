@@ -11,12 +11,14 @@ output:
 editor_options: 
   markdown: 
     wrap: 72
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-\newpage 
+
+\newpage
 
 ## Exercise 4.2 + 4.3
 
@@ -539,6 +541,108 @@ fig1
 #p1
 ```
 
+## Exercise 4.6 (Vectorized)
+
+```{r, message=FALSE}
+#want the map function from purrr:
+library(tidyverse)
+library(scales)
+packageVersion("tidyverse")
+```
+
+Contractual information provided:
+
+```{r, contractual_info}
+x <- 35     #age
+T <- 25     #length of contract
+r <- 0.035  #interest rate 
+E <- 125000 #endownment 
+B <- 250000 #death-benfit
+```
+
+```{r, 4_6_rates_and_prob}
+#0: alive, 1: dead
+mu01 <- function(t){
+  return(0.0015 + 0.0004*(t-35))
+}
+
+p_surv <- function(t, s){
+  f <- Vectorize(mu01)
+  integral <- integrate(f, lower = t, upper = s)$value
+  
+  ans <- exp(-integral)
+  return(ans)
+}
+
+#discount factor
+v <- function(t){
+  return(exp(-(r*t)))
+}
+```
+
+We have the following reserve:
+
+$$\begin{aligned}
+V_{*}^{+}(t,A) &= \frac{v(T)}{v(t)}p_{**}^{x}(t,T)E -\pi\sum_{n=t}^{T-1}\frac{v(n)}{v(t)}p_{**}^{x}(t,n) + B\sum_{n=t}^{T-1}\frac{v(n+1)}{v(t)}p_{**}^{x}(t,n)p_{*\dagger}^{x}(n, n+1)
+\end{aligned}$$
+
+We will now use the equivalence principle, which states that the fair
+premium $\pi$ should be such that $V_{*}(0,A) = 0$, and using this
+method we end up with: $$\begin{aligned}
+\pi &= \frac{v(T)p_{**}(x,x+T)E + B\sum_{n=0}^{T-1}v(n+1)p_{**}(x,x+n)p_{*\dagger}(x+n,x+n+1)}{\sum_{n=0}^{T-1}v(n)p_{**}(x,x+n)}
+\end{aligned}$$
+```{r}
+upper_summand <- function(n){
+  v(n+1)*p_surv(x, x + n)*(1-p_surv(x + n, x + n +1))
+}
+
+lower_summand <- function(n){
+  v(n)*p_surv(x, x + n)
+}
+
+upper_sum <- sum(map_dbl(0:(T-1), upper_summand))
+lower_sum <- sum(map_dbl(0:(T-1), lower_summand))
+
+upper_expression <- v(T)*p_surv(x, x + T)*E + B*upper_sum
+
+yearly_premium <- upper_expression/lower_sum
+yearly_premium
+```
+
+```{r, reserve}
+
+V_star <- function(t){
+  
+  #inner summands
+  summand_1 <- function(t, n){
+    (v(n)/v(t))*p_surv(x + t, x +n)
+  }
+
+  summand_2 <- function(t, n){
+    (v(n+1)/v(t))*p_surv(t + x, n + x)*(1 - p_surv(x + n, x + n +1))
+  }
+  
+  ans <- (v(T)/v(t))*p_surv(x + t, x + T)*E - 
+         yearly_premium*sum(map_dbl(t:(T-1),summand_1, t = t)) + B*sum(
+                        map_dbl(t:(T-1), summand_2, t = t))
+  
+  return(ans)
+}
+
+length_contract <- 0:T
+reserve <- map_dbl(0:T, V_star)
+
+df <- data.frame(length_contract, reserve)
+colnames(df) <- c("length_contract", "reserve")
+
+df %>%
+  ggplot(aes(x = length_contract, y = reserve)) + 
+  geom_line() + 
+  scale_y_continuous(labels = dollar)
+```
+
+\newpage
+
 ## Exercise 4.7 Discrete vs continous time endowment insurance
 
 In this exercise we are considering an endowment insurance, hence
@@ -714,10 +818,6 @@ below_cont <- integral_lower
 premium_cont <- above_cont/below_cont
 premium_cont
 ```
-
-We then recall what the premiums were in the different cases:
-
-
 
 We then recall what the premiums were:
 
