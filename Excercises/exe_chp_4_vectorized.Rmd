@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 \newpage
 
-## Exercise 4.4 Term insurance in discrete time 
+## Exercise 4.4 Term insurance in discrete time
 
 Required libraries:
 
@@ -91,7 +91,6 @@ p_surv <- function(t,s){
   integral <- integrate(f, lower = t, upper = s)$value
   return(exp((-1)*integral))
 }
-
 v <- function(t){
   return(exp(-(r*t)))
 }
@@ -203,7 +202,7 @@ V_star <- function(t){
 }
 
 length_contract <- 0:T
-reserve <- map_dbl(0:T, V_star)
+reserve <- map_dbl(length_contract, V_star)
 
 df <- data.frame(length_contract, reserve)
 colnames(df) <- c("length_contract", "reserve")
