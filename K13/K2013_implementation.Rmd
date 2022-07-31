@@ -68,7 +68,7 @@ We will evaluate the integral yearly, giving us $\Delta u_{k} = 1 \implies N = (
 
 ```{r}
 #trapizodal rule:
-p_surv <- function(x, G, t, s, Y){
+p_surv <- function(x, G, Y, t, s){
   
   if (t == s){
     return(1)
@@ -88,8 +88,29 @@ p_surv <- function(x, G, t, s, Y){
   return(ans)
 }
 
-#24 year old man, surviving the next 10 years, given that we are in 2022:
-p_surv(24, "M", 0, 10, 2022)
+#24 year old man in 2022, surviving the next 10 years
+p_surv(24, "M", 2022, 0, 10)
+```
+\newpage
+Using the built in integrate method:
+```{r}
+#turning mu into a function of u, so that we can use integrate 
+mu <- function(u, x, G, Y = 2022){
+  return(mu_kol_2013(x+u, G)*(1 + w(x+u, G)/100)^{(Y+u-2013)})
+}
+
+
+p <- function(x, G, Y, t, s){
+  f <- Vectorize(mu)
+  integral <- integrate(f, lower = t, upper = s, x=x, Y=Y, G=G)$value
+  
+  ans <- exp((-1)*integral)
+  return(ans)
+}
+
+#24 year old man in 2022, surviving the next 10 years:
+p(24, "M", 2022, 0, 10)
+
 ```
 
 
