@@ -117,5 +117,36 @@ p <- function(x, G, Y, t, s){
 p(24, "M", 2022, 0, 10)
 
 ```
+\newpage
+Inspired by Rstudio's move to Posit, and wanted to throw in some 
+Python. (Looking forward to the day i master pdf i Quarto :))
+```{python}
+import numpy as np
+import pandas as pd
+from scipy.integrate import quad
+
+def w(x, G):
+  if G == "M":
+    return min(2.671548-0.172480*x + 0.001485*x**2, 0)
+  else: 
+    return min(1.287968-0.101090*x+ 0.000814*x**2,0) 
+  
+def mu_kol_2013(x, G): 
+  if G == "M":
+    return (0.241752+0.004536*10**(0.051*x))/1000
+  else: 
+    return (0.085411+0.003114*10**(0.051*x))/1000
+
+def mu(u, x, G, Y = 2022): 
+  return mu_kol_2013(x+u, G)*(1 + w(x+u, G)/100)**(Y+u-2013)
 
 
+def p_surv(x, G, Y, t, s):
+  
+  integral = quad(mu, t, s, args = (x, G, Y))[0]
+  
+  return round(np.exp(-integral),6)
+
+#24 year old man in 2022, surviving the next 10 years:
+p_surv(24, "M", 2022, 0, 10)  
+```
