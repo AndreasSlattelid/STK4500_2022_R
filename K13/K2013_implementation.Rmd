@@ -101,6 +101,11 @@ mu <- function(u, x, G, Y = 2022){
 
 
 p <- function(x, G, Y, t, s){
+  
+  if (t == s){
+    return(1)
+  }
+  
   f <- Vectorize(mu)
   integral <- integrate(f, lower = t, upper = s, x=x, Y=Y, G=G)$value
   
