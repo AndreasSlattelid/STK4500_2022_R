@@ -120,17 +120,17 @@ $$\begin{aligned}
 ```{r, probs}
 #both survive:
 p_00 <- function(t, n){
-    p_surv(x, G="M", Y=2022, t=t,s = n)*p_surv(y, G="F", Y=2022, t=0, s=n)
+    p_surv(x, G="M", Y=2022, t=t,s = n)*p_surv(y, G="F", Y=2022, t=t, s=n)
   }
   
 #man dies, woman survive:
 p_01 <- function(t,n){
-  (1 - p_surv(x, G="M", Y = 2022, t=t,s = n ))*p_surv(y, G = "F", Y=2022, t=t, s = n )
+  (1 - p_surv(x, G="M", Y = 2022, t=t,s = n ))*p_surv(y, G = "F", Y=2022, t=t, s = n)
 }
   
 #man survive, woman die:
 p_02 <- function(t,n){
-  p_surv(x, G="M", Y=2022, t=t,s = n )*(1 - p_surv(y, G="F", Y=2022, t=t, s = n ))
+  p_surv(x, G="M", Y=2022, t=t,s = n )*(1 - p_surv(y, G="F", Y=2022, t=t, s = n))
 }
 
 #wife remains alive:
