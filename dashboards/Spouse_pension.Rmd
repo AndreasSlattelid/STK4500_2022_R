@@ -16,7 +16,7 @@ library(tidyverse)
 library(scales)
 ```
 
-We will be considering a spouse model, the insured will get a yearly pension $P$, in case of death of one of the isured dies. Let insured number one have age $x$ and age of insured number two have age $y$.
+We will be considering a spouse model, the insured will get a yearly pension $P$, in case one of the insured dies. Let insured number one have age $x$ and age of insured number two have age $y$.
 
 The state space will be: $S = \{0,1,2,3\}$
 
