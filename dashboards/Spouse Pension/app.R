@@ -1,0 +1,248 @@
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+library(highcharter)
+library(scales)
+
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Spouse Pension"),
+  dashboardSidebar(
+    numericInput("int_rate", "Interest rate (r)", value = 0.03, min = -0.05, max = 1, step = 0.01),
+    numericInput("length_contract", "Lenfth of contract (T)", value = 50, min = 0, max = 100),
+    numericInput("pension", "Pension (P)", value = 100000, min = 0, max = 1e9, step = 10000),
+    actionButton("action1", "Submit")
+  ),
+  dashboardBody(
+    fluidRow(
+      box(radioButtons("gender_x", "Person 1 aged x:", 
+                       c("Male" = "M", "Female" = "F")),
+          numericInput("age_x", "Age (x)", value = 48, min = 16, max = 120))
+      , 
+      box(radioButtons("gender_y", "Person 2 aged y:", 
+                       c("Male" = "M", "Female" = "F"), selected = "F"), 
+          numericInput("age_y", "Age (y)", value = 54, min = 0, max = 120)
+          )
+      ), 
+    fluidRow(box(textOutput("yearly_premium")),box(textOutput("mnt_premium")) ), 
+    fluidRow(box(tableOutput("reserve")), box(highchartOutput("reserve_plt")))
+  )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  #States: 
+  #p1: person aged x
+  #p2: person aged y
+  #0: p1, p2 alive
+  #1: p1 dead, p2 alive
+  #2: p1 alive, p2 dead 
+  #3: p1, p2 dead
+  
+  #GLOBAL VARIABLES:
+  #The weights given by finanstilsynet
+  w <- function(x, G){
+    #male: G = "M"
+    #female: G = "F"
+    #x: age in calender year t,
+    if (G == "M"){
+      return (min(2.671548-0.172480*x + 0.001485*x**2, 0))
+    } 
+    else {
+      return(min(1.287968-0.101090*x+ 0.000814*x**2,0))
+    }
+  }
+  
+  mu_kol_2013 <- function(x, G){
+    #male
+    if (G == "M"){
+      return((0.241752+0.004536*10**(0.051*x))/1000)
+    }
+    #female
+    else {
+      return((0.085411+0.003114*10**(0.051*x))/1000)
+    }
+  } 
+  
+  #turning mu into a function of u, so that we can use integrate 
+  mu <- function(u, x, G, Y = 2022){
+    return(mu_kol_2013(x+u, G)*(1 + w(x+u, G)/100)^{(Y+u-2013)})
+  }
+  
+  p_surv <- function(x, G, Y, t, s){
+    
+    if (t == s){
+      return(1)
+    }
+    
+    f <- Vectorize(mu)
+    integral <- integrate(f, lower = t, upper = s, x=x, Y=Y, G=G)$value
+    
+    ans <- exp((-1)*integral)
+    return(ans)
+  }
+  
+  x <- reactive({
+    input$age_x
+  })
+  
+  y <- reactive({
+    input$age_y
+  }) 
+    
+  
+  G_x <-reactive({
+    input$gender_x
+  })
+  
+  G_y <- reactive({
+    input$gender_y
+  })
+    
+  r <- reactive({
+    input$int_rate
+  }) 
+  
+  T <- reactive({
+    input$length_contract
+  })
+  
+  P <- reactive({
+    input$pension
+  })
+  
+  v <- function(t){
+    return(exp(-(r()*t)))
+  } 
+  
+  
+  #PROBABILITES: 
+  #both survive:
+  p_00 <- function(t, n){
+    p_surv(x(), G= G_x(), Y=2022, t=t,s = n)*p_surv(y(), G= G_y(), Y=2022, t=t, s=n)
+  }
+  
+  #p1 dies, p2 survive:
+  p_01 <- function(t,n){
+    (1 - p_surv(x(), G=G_x(), Y = 2022, t=t,s = n ))*p_surv(y(), G = G_y(), Y=2022, t=t, s = n)
+  }
+  
+  #p1 survive, p2 die:
+  p_02 <- function(t,n){
+    p_surv(x(), G=G_x(), Y=2022, t=t,s = n )*(1 - p_surv(y(), G=G_y(), Y=2022, t=t, s = n))
+  }
+  
+  #p2 remains alive:
+  p_11 <- function(t,n){
+    p_surv(y(), G = G_y(), Y=2022, t=t, s = n)
+  } 
+  
+  #p1 remains alive: 
+  p_22 <- function(t,n){
+    p_surv(y(), G = G_x(), Y=2022, t=t, s = n)
+  }
+  
+  prem <- eventReactive(input$action1, {
+    
+    upper_summand <- function(n){
+      prob <- p_01(0,n) + p_02(0,n)
+      return(v(n)*prob)
+    }
+    
+    lower_summand <- function(n){
+      prob <- p_00(0,n)
+      return(v(n)*prob)
+    }
+    
+    ans <- P()*sum(map_dbl(0:(T()-1), upper_summand))/sum(map_dbl(0:(T()-1), lower_summand))
+    ans
+  }, ignoreNULL = FALSE)
+  
+  output$yearly_premium <- renderText({
+    sprintf("The yearly premium should be: NOK %s", scales::label_comma(accuracy = .1)(prem()))
+  })
+  
+  output$mnt_premium <- renderText({
+    sprintf("The monthly premium should be: NOK %s", scales::label_comma(accuracy = .1)(prem()/12))
+  })
+  
+  reserves <- eventReactive(input$action1, {
+    
+    V_0 <- function(t){
+      
+      summand_1 <- function(t, n){
+        (v(n)/v(t))*p_00(t, n)
+      }
+      
+      summand_2 <- function(t, n){
+        (v(n)/v(t))*(p_01(t,n) + p_02(t,n))
+      }
+      
+      ans <- (-1)*prem()*sum(map_dbl(t:(T()-1),summand_1, t = t)) + P()*sum(
+        map_dbl(t:(T()-1), summand_2, t = t))
+      
+      return(ans)
+    }
+    
+    #reseve in state 1: 
+    V_1 <- function(t){
+      
+      summand <- function(t, n){
+        (v(n)/v(t))*p_11(t,n)
+      }
+      
+      ans <- P()*sum(map_dbl(t:(T()-1), summand, t = t))
+      
+      return(ans)
+    }
+    
+    #reserve in state 2: 
+    V_2 <- function(t){
+      
+      summand <- function(t,n){
+        (v(n)/v(t))*p_22(t,n)
+      }
+      
+      ans <- P()*sum(map_dbl(t:(T()-1), summand, t = t))
+      
+      return(ans)
+    }
+    
+    
+    
+    length_contract <- 0:(T()-1)
+    state0 <- round(map_dbl(length_contract, V_0),2)
+    
+    
+    df <- data.frame(length_contract, state0) %>% 
+      mutate(state1 = round(map_dbl(length_contract, V_1), 2)) %>% 
+      mutate(state2 = round(map_dbl(length_contract, V_2), 2))
+    
+    df
+  }, ignoreNULL = FALSE)
+  
+  output$reserve <- renderTable({
+    reserves()
+  }) 
+  
+  plt <- eventReactive(input$action1, {
+    
+    df_plt <- reserves() %>% 
+      pivot_longer(!length_contract, names_to = "state", values_to = "reserve")
+    
+    fig <- df_plt %>% 
+      hchart("line", hcaes(x = length_contract, y = reserve, group = state))
+    
+    fig
+    
+  }, ignoreNULL = FALSE)
+  
+  
+  output$reserve_plt <- renderHighchart({
+    plt()
+  })
+  
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
