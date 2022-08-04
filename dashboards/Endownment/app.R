@@ -67,10 +67,10 @@ server <- function(input, output){
   
   output$yearly_premium <- renderText({
     sprintf("According to the equivalence principle, the yearly premium should be: NOK %s", round(yearly_prem(), 2)
-)
+    )
   }) 
-
-    reserve1 <- eventReactive(input$action1, {
+  
+  reserve1 <- eventReactive(input$action1, {
     
     x <- input$age
     T <- input$length_contract
@@ -112,7 +112,7 @@ server <- function(input, output){
   output$reserve <- renderTable({
     reserve1()
   })
-
+  
   plt <- eventReactive(input$action1, {
     fig <- reserve1() %>% 
       hchart("line", hcaes(x = length_contract, y = reserve)

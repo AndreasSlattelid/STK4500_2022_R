@@ -2,7 +2,8 @@
 title: "Spouse model implemented with K13"
 author: "Andreas Slåttelid"
 date: 
-output: pdf_document
+output:
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
