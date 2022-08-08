@@ -9,7 +9,7 @@ ui <- dashboardPage(
   dashboardHeader(title = "Spouse Pension"),
   dashboardSidebar(
     numericInput("int_rate", "Interest rate (r)", value = 0.03, min = -0.05, max = 1, step = 0.01),
-    numericInput("length_contract", "Lenfth of contract (T)", value = 50, min = 0, max = 100),
+    numericInput("length_contract", "Length of contract (T)", value = 45, min = 0, max = 100),
     numericInput("pension", "Pension (P)", value = 100000, min = 0, max = 1e9, step = 10000),
     actionButton("action1", "Submit")
   ),
@@ -83,10 +83,16 @@ server <- function(input, output) {
   }
   
   x <- reactive({
+    if (input$age_x < 16){
+      stop("The insured needs to be 16 or above")
+    }
     input$age_x
   })
   
   y <- reactive({
+    if (input$age_y < 16){
+      stop("The insured needs to be 16 or above")
+    }
     input$age_y
   }) 
     
@@ -104,10 +110,16 @@ server <- function(input, output) {
   }) 
   
   T <- reactive({
+    if (input$length_contract <= 0){
+      stop("The contract length cannot be negative!")
+    }
     input$length_contract
   })
   
   P <- reactive({
+    if (input$pension <= 0){
+      stop("Please choose a positive pension!")
+    }
     input$pension
   })
   
