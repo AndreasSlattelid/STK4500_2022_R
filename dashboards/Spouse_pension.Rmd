@@ -7,14 +7,16 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message=FALSE)
 ```
 
 ## Spouse model
 
-```{r, warning=FALSE, message=FALSE}
+```{r}
 library(tidyverse)
 library(scales)
+library(data.table)
+library(dtplyr)  #want to test if dt speeds up the df
 ```
 
 We will be considering a spouse model, the insured will get a yearly pension $P$, in case one of the insured dies. Let insured number one have age $x$ and age of insured number two have age $y$.
@@ -208,14 +210,36 @@ V_2 <- function(t){
 length_contract <- 0:(T-1)
 state0 <- map_dbl(length_contract, V_0)
 
-
 df <- data.frame(length_contract, state0) %>% 
   mutate(state1 = map_dbl(length_contract, V_1)) %>% 
   mutate(state2 = map_dbl(length_contract, V_2)) %>% 
   pivot_longer(!length_contract, names_to = "state", values_to = "reserve")
-  
+
 df %>%
   ggplot(aes(x = length_contract, y = reserve)) +
   geom_line(aes(color = state, linetype = state)) +
   scale_y_continuous(labels = dollar) 
 ```
+\newpage
+Some motivation for speeding up the shiny app:
+```{r, dt}
+dt_lazy <- dtplyr::lazy_dt(data.frame(length_contract, state0))
+
+dt_query <- dt_lazy %>% 
+  mutate(state1 = map_dbl(length_contract, V_1)) %>% 
+  mutate(state2 = map_dbl(length_contract, V_2)) %>% 
+  dplyr::show_query()
+
+dt_query
+
+mydt <- as.data.table(data.frame(length_contract, state0))
+
+#the query from dt_query:
+dt <- mydt[, `:=`(state1 = map_dbl(length_contract, ..V_1))][, 
+    `:=`(state2 = map_dbl(length_contract, ..V_2))]
+
+head(dt, 10)
+```
+
+
+
