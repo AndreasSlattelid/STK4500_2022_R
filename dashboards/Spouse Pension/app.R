@@ -1,9 +1,15 @@
+#--------------------------#
 library(shiny)
 library(shinydashboard)
+
+#wrangeling
 library(tidyverse)
+library(data.table)
+
+#plotting and formatting
 library(highcharter)
 library(scales)
-
+#--------------------------#
 
 ui <- dashboardPage(
   dashboardHeader(title = "Spouse Pension"),
@@ -29,7 +35,7 @@ ui <- dashboardPage(
   )
 )
 
-# Define server logic required to draw a histogram
+
 server <- function(input, output) {
   #States: 
   #p1: person aged x
@@ -225,12 +231,17 @@ server <- function(input, output) {
     length_contract <- 0:(T()-1)
     state0 <- round(map_dbl(length_contract, V_0),2)
     
+    #data frame:
+    # df <- data.frame(length_contract, state0) %>% 
+    #   mutate(state1 = round(map_dbl(length_contract, V_1), 2)) %>% 
+    #   mutate(state2 = round(map_dbl(length_contract, V_2), 2))
+    # 
+    # df
     
-    df <- data.frame(length_contract, state0) %>% 
-      mutate(state1 = round(map_dbl(length_contract, V_1), 2)) %>% 
-      mutate(state2 = round(map_dbl(length_contract, V_2), 2))
-    
-    df
+    dt <- as.data.table(data.frame(length_contract, state0))
+    dt_reserves <- dt[, `:=`(state1 = map_dbl(length_contract, ..V_1))][, 
+                        `:=`(state2 = map_dbl(length_contract, ..V_2))]
+    dt_reserves
   }, ignoreNULL = FALSE)
   
   output$reserve <- renderTable({
@@ -240,6 +251,7 @@ server <- function(input, output) {
   plt <- eventReactive(input$action1, {
     
     df_plt <- reserves() %>% 
+      as_tibble() %>% 
       pivot_longer(!length_contract, names_to = "state", values_to = "reserve")
     
     fig <- df_plt %>% 
