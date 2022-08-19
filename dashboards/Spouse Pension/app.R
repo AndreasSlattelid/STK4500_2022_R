@@ -9,13 +9,16 @@ library(data.table)
 #plotting and formatting
 library(highcharter)
 library(scales)
+
+#speed 
+library(memoise)
 #--------------------------#
 
 ui <- dashboardPage(
   dashboardHeader(title = "Spouse Pension"),
   dashboardSidebar(
     numericInput("int_rate", "Interest rate (r)", value = 0.03, min = -0.05, max = 1, step = 0.01),
-    numericInput("length_contract", "Length of contract (T)", value = 45, min = 0, max = 100),
+    numericInput("length_contract", "Length of contract (T)", value = 10, min = 0, max = 100),
     numericInput("pension", "Pension (P)", value = 100000, min = 0, max = 1e9, step = 10000),
     actionButton("action1", "Submit")
   ),
@@ -23,16 +26,16 @@ ui <- dashboardPage(
     fluidRow(
       box(radioButtons("gender_x", "Person 1 aged x:", 
                        c("Male" = "M", "Female" = "F")),
-          numericInput("age_x", "Age (x)", value = 48, min = 16, max = 120))
+          numericInput("age_x", "Age (x)", value = 25, min = 16, max = 120))
       , 
       box(radioButtons("gender_y", "Person 2 aged y:", 
                        c("Male" = "M", "Female" = "F"), selected = "F"), 
-          numericInput("age_y", "Age (y)", value = 54, min = 0, max = 120)
+          numericInput("age_y", "Age (y)", value = 23, min = 0, max = 120)
           )
       ), 
     fluidRow(box(textOutput("yearly_premium")),box(textOutput("mnt_premium")) ), 
     fluidRow(box(tableOutput("reserve")), box(highchartOutput("reserve_plt")))
-  )
+  ) 
 )
 
 
@@ -50,7 +53,7 @@ server <- function(input, output) {
   w <- function(x, G){
     #male: G = "M"
     #female: G = "F"
-    #x: age in calender year t,
+    #x: age in calender year Y,
     if (G == "M"){
       return (min(2.671548-0.172480*x + 0.001485*x**2, 0))
     } 
@@ -87,6 +90,9 @@ server <- function(input, output) {
     ans <- exp((-1)*integral)
     return(ans)
   }
+  
+  #works a bit like caching i think
+  p_surv <- memoise::memoise(p_surv)
   
   x <- reactive({
     if (input$age_x < 16){
@@ -133,7 +139,6 @@ server <- function(input, output) {
     return(exp(-(r()*t)))
   } 
   
-  
   #PROBABILITES: 
   #both survive:
   p_00 <- function(t, n){
@@ -157,7 +162,7 @@ server <- function(input, output) {
   
   #p1 remains alive: 
   p_22 <- function(t,n){
-    p_surv(y(), G = G_x(), Y=2022, t=t, s = n)
+    p_surv(x(), G = G_x(), Y=2022, t=t, s = n)
   }
   
   prem <- eventReactive(input$action1, {
@@ -231,7 +236,7 @@ server <- function(input, output) {
     length_contract <- 0:(T()-1)
     state0 <- round(map_dbl(length_contract, V_0),2)
     
-    #data frame:
+    #data
     # df <- data.frame(length_contract, state0) %>% 
     #   mutate(state1 = round(map_dbl(length_contract, V_1), 2)) %>% 
     #   mutate(state2 = round(map_dbl(length_contract, V_2), 2))
@@ -246,7 +251,7 @@ server <- function(input, output) {
   
   output$reserve <- renderTable({
     reserves()
-  }) 
+  })
   
   plt <- eventReactive(input$action1, {
     
