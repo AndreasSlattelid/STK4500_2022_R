@@ -18,19 +18,19 @@ ui <- dashboardPage(
   dashboardHeader(title = "Spouse Pension"),
   dashboardSidebar(
     numericInput("int_rate", "Interest rate (r)", value = 0.03, min = -0.05, max = 1, step = 0.01),
-    numericInput("length_contract", "Length of contract (T)", value = 10, min = 0, max = 100),
+    numericInput("length_contract", "Length of contract (T)", value = 60, min = 0, max = 100),
     numericInput("pension", "Pension (P)", value = 100000, min = 0, max = 1e9, step = 10000),
     actionButton("action1", "Submit")
   ),
   dashboardBody(
     fluidRow(
       box(radioButtons("gender_x", "Person 1 aged x:", 
-                       c("Male" = "M", "Female" = "F")),
+                       c("Male" = "M", "Female" =   "F")),
           numericInput("age_x", "Age (x)", value = 25, min = 16, max = 120))
       , 
       box(radioButtons("gender_y", "Person 2 aged y:", 
                        c("Male" = "M", "Female" = "F"), selected = "F"), 
-          numericInput("age_y", "Age (y)", value = 23, min = 0, max = 120)
+          numericInput("age_y", "Age (y)", value = 24, min = 0, max = 120)
           )
       ), 
     fluidRow(box(textOutput("yearly_premium")),box(textOutput("mnt_premium")) ), 
@@ -135,10 +135,11 @@ server <- function(input, output) {
     input$pension
   })
   
-  v <- function(t){
-    return(exp(-(r()*t)))
+  v <- function(r, t){
+    return(exp(-(r*t)))
   } 
   
+  v <- memoise::memoise(v)
   #PROBABILITES: 
   #both survive:
   p_00 <- function(t, n){
@@ -169,12 +170,12 @@ server <- function(input, output) {
     
     upper_summand <- function(n){
       prob <- p_01(0,n) + p_02(0,n)
-      return(v(n)*prob)
+      return(v(r(),n)*prob)
     }
     
     lower_summand <- function(n){
       prob <- p_00(0,n)
-      return(v(n)*prob)
+      return(v(r(), n)*prob)
     }
     
     ans <- P()*sum(map_dbl(0:(T()-1), upper_summand))/sum(map_dbl(0:(T()-1), lower_summand))
@@ -193,12 +194,15 @@ server <- function(input, output) {
     
     V_0 <- function(t){
       
+      #avoid computing multiple times:
+      v_rt <- v(r(), t)
+      
       summand_1 <- function(t, n){
-        (v(n)/v(t))*p_00(t, n)
+        (v(r(), n)/v_rt)*p_00(t, n)
       }
       
       summand_2 <- function(t, n){
-        (v(n)/v(t))*(p_01(t,n) + p_02(t,n))
+        (v(r(), n)/v_rt)*(p_01(t,n) + p_02(t,n))
       }
       
       ans <- (-1)*prem()*sum(map_dbl(t:(T()-1),summand_1, t = t)) + P()*sum(
@@ -210,8 +214,9 @@ server <- function(input, output) {
     #reseve in state 1: 
     V_1 <- function(t){
       
+      v_rt <- v(r(), t)
       summand <- function(t, n){
-        (v(n)/v(t))*p_11(t,n)
+        (v(r(), n)/v_rt)*p_11(t,n)
       }
       
       ans <- P()*sum(map_dbl(t:(T()-1), summand, t = t))
@@ -223,7 +228,7 @@ server <- function(input, output) {
     V_2 <- function(t){
       
       summand <- function(t,n){
-        (v(n)/v(t))*p_22(t,n)
+        (v(r(), n)/v(r(), t))*p_22(t,n)
       }
       
       ans <- P()*sum(map_dbl(t:(T()-1), summand, t = t))
@@ -233,7 +238,7 @@ server <- function(input, output) {
     
     
     
-    length_contract <- 0:(T()-1)
+    length_contract <- 0:(T())
     state0 <- round(map_dbl(length_contract, V_0),2)
     
     #data
